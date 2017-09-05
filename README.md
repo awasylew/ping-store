@@ -48,8 +48,11 @@ GET ping-store/pings
 >>> [{id:456, time:"20170903175923", ...}, {}, {}, ...]						
 ```
 
+!!! inne podejście do zapytania po id
 ```
-GET ping-store/pings?id=367
+GET ping-store/pings/{id}
+```
+```
 GET ping-store/pings?limit=N     # N kolejnych ostatnich wg czasu zapisów (domyślnie 10)
 GET ping-store/pings?offset=M     #z pominięciem M pierwszych (domyślnie 0)
 GET ping-store/pings?origin=A8
@@ -73,6 +76,7 @@ GET ping-store/targets?origin=A8&end=20180903
 ### Usuwanie wyników ping
 
 ```
+DELETE ping-store/pings/{id}
 DELETE ping-store/pings?limit=N
 DELETE ping-store/pings?offset=M
 DELETE ping-store/pings?id=367
