@@ -8,261 +8,294 @@ basePath: /v1
 tags:
 - name: pings
   description: Surowe zapisy pojedynczych pingów
-- name: aggregates
-  description: Agregacja pingów w minuty
-- name: dictionaries
-  description: Agregacja pingów w godziny
+- name: agregaty
+  description: Agregacja pingów w jednostkach czasu
+- name: słowniki
+  description: Słowniki do zapytań (stworzone automatycznie z wyników ping)
 schemes:
 - http
+host: localhost
 paths:
   /pings:
     post:
       tags:
       - pings
-      summary: Add a new pet to the store
-      operationId: addPet
+      summary: Wstawianie wyników ping.
+      description: Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz.
       consumes:
-      - application/json
-      - application/xml
+      - "application/json"
       produces:
-      - application/json
-      - application/xml
-      responses:
-        405:
-          description: Invalid input
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
-    get:
-      tags:
-      - pings
-      summary: Update an existing pet
-      operationId: updatePet
-      consumes:
-      - application/json
-      - application/xml
-      produces:
-      - application/json
-      - application/xml
+      - "application/json"
       parameters:
       - in: body
         name: body
-        description: Pet object that needs to be added to the store
+        description: Obiekt wyniku ping do wstawienia.
         required: true
+        schema:
+          $ref: '#/definitions/PingResult'
       responses:
-        400:
-          description: Invalid ID supplied
-        404:
-          description: Pet not found
-        405:
-          description: Validation exception
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
-    delete:
-      tags:
-        - pings
-      responses:
-        400:
-          description: Invalid ID supplied
-  /pings/{id}:
+        200:
+          description: OK
+          schema:
+            type: integer
+            example: 367
     get:
       tags:
       - pings
-      summary: Update an existing pet
-      operationId: updatePet
+      summary: Pobiera wyniki ping
+      description: Zwraca tablicę wyników opcjonalnie spełniających podane kryteria.
+      parameters:
+      - in: query
+        name: limit
+        description: Maksymalna liczba wyników do pobrania (domyślnie 10???)
+        required: false
+        type: integer
+      - in: query
+        name: offset
+        description: Liczba pierwszych wyników do pominięcia (domyślnie 0)
+        required: false
+        type: integer
+      - in: query
+        name: origin
+        description: Pobieraj tylko wyniki dla podanego źródła
+        required: false
+        type: integer
+      - in: query
+        name: target
+        description: Pobieraj tylko wyniki dla podanego celu
+        required: false
+        type: integer
+      - in: query
+        name: start
+        description: Pobieraj tylko wyniki z podanego czasu późniejsze (porządek leksykograficzny)
+        required: false
+        type: string
+      - in: query
+        name: end
+        description: Pobieraj tylko wyniki wcześniejsze od podanego czasu (porządek leksykograficzny)
+        required: false
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PingResult'
+    delete:
+      tags:
+      - pings
+      summary: Kasuje wyniki ping
+      description: Kasuje wyniki (opcjonalnie - tylko spełniające podane kryteria).
+      parameters:
+      - in: query
+        name: limit
+        description: Maksymalna liczba wyników do usunięcia (domyślnie 10???)
+        required: false
+        type: integer
+      - in: query
+        name: offset
+        description: Liczba pierwszych wyników do pominięcia (domyślnie 0)
+        required: false
+        type: integer
+      - in: query
+        name: origin
+        description: Kasuj tylko wyniki dla podanego źródła
+        required: false
+        type: integer
+      - in: query
+        name: target
+        description: Kasuj tylko wyniki dla podanego celu
+        required: false
+        type: integer
+      - in: query
+        name: start
+        description: Kasuj tylko wyniki z podanego czasu późniejsze (porządek leksykograficzny)
+        required: false
+        type: string
+      - in: query
+        name: end
+        description: Kasuj tylko wyniki wcześniejsze od podanego czasu (porządek leksykograficzny)
+        required: false
+        type: string
+      responses:
+        200:
+          description: Deleted
+  /pings/{ping-id}:
+    get:
+      tags:
+      - pings
+      summary: Pobiera pojedynczy wynik ping.
       consumes:
-      - application/json
-      - application/xml
+      - "application/json"
       produces:
-      - application/json
-      - application/xml
+      - "application/json"
       parameters:
       - in: path
-        name: body
-        description: Pet object that needs to be added to the store
+        name: ping-id
+        description: Identyfikator wyniku do pobrania
         required: true
-        schema:
-          $ref: '#/definitions/Pet'
+        type: integer
       responses:
-        400:
-          description: Invalid ID supplied
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/PingResult'
         404:
-          description: Pet not found
-        405:
-          description: Validation exception
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
+          description: Nie ma takiego wyniku
   /minutes/{minute}:
     get:
       tags:
-      - aggregates
-      summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
-      operationId: findPetsByStatus
+      - agregaty
+      summary: Agregacja wyników ping w minuty
+      description: 'Można mieć wiele agregatów za ten sam okres? Można agregować agregaty? A może agreagowanie nie powinno być zlecane tylko dziać się automatycznie? Agregaty można robić też z dancyh surowych na bieżąco np. za pomocą widoków - zajmują więcej miejsca. A może widoki połączą dane surowe i zagregowane (może wymagać transakcyjnej agregacji). Możliwe agregaty: minuta, godzina, doba ping-store/days&date=  -> JSON { start:, end:, expected:(liczba próbek), actual:(liczba próbek), avg... } ping-store/days  - lista dni -> { 2017-08-20, 2018-08-21, ... } "20170820" ping-store/days?date=20170824 albo start=20170824&end=20170825 (wymaga tworów typu +1 różnych poziomach}'
       produces:
       - application/json
-      - application/xml
       parameters:
       - name: minute
         in: path
-        description: Status values that need to be considered for filter
+        description: Minuta, z której ma być przygotowany agragat (np. 201709072134)
         required: true
-        type: array
-        items:
-          type: string
-          enum:
-          - available
-          - pending
-          - sold
-          default: available
-        collectionFormat: multi
+        type: string
       responses:
         200:
-          description: successful operation
+          description: OK
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Pet'
-        400:
-          description: Invalid status value
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
+            $ref: '#/definitions/PingAggregate'
   /hours/{hour}:
     get:
       tags:
-      - aggregates
-      summary: Finds Pets by tags
-      description: Muliple tags can be provided with comma separated strings. Use\
-        \ tag1, tag2, tag3 for testing.
-      operationId: findPetsByTags
+      - agregaty
+      summary: Agregacja wyników ping w godziny
       produces:
       - application/json
-      - application/xml
       parameters:
       - name: hour
         in: path
-        description: Tags to filter by
+        description: Godzina, z której ma być przygotowany agragat (np. 2017090721)
         required: true
-        type: array
-        items:
-          type: string
-        collectionFormat: multi
+        type: string
       responses:
         200:
-          description: successful operation
+          description: OK
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Pet'
-        400:
-          description: Invalid tag value
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
+            $ref: '#/definitions/PingAggregate'
   /days/{day}:
     get:
       tags:
-      - aggregates
-      summary: Find pet by ID
-      description: Returns a single pet
-      operationId: getPetById
+      - agregaty
+      summary: Agregacja wyników ping w dni
       produces:
       - application/json
-      - application/xml
       parameters:
       - name: day
         in: path
-        description: ID of pet to return
+        description: Dzień, z którego ma być przygotowany agragat (np. 20170907)
         required: true
-        type: integer
-        format: int64
+        type: string
       responses:
         200:
-          description: successful operation
+          description: OK
           schema:
-            $ref: '#/definitions/Pet'
-        400:
-          description: Invalid ID supplied
-        404:
-          description: Pet not found
-      security:
-      - api_key: []
+            $ref: '#/definitions/PingAggregate'
   /origins:
     get:
       tags:
-      - dictionaries
-      summary: uploads an image
-      operationId: uploadFile
-      consumes:
-      - multipart/form-data
+      - słowniki
+      summary: Wszystkie źródła w wynikach ping
+      description: Może dodać jeszcze opcjonalne parametry takie jak w GET /pings?
       produces:
       - application/json
-      parameters:
-      - name: petId
-        in: path
-        description: ID of pet to update
-        required: true
-        type: integer
-        format: int64
-      - name: additionalMetadata
-        in: formData
-        description: Additional data to pass to server
-        required: false
-        type: string
-      - name: file
-        in: formData
-        description: file to upload
-        required: false
-        type: file
       responses:
         200:
-          description: successful operation
+          description: OK
           schema:
-            $ref: '#/definitions/ApiResponse'
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
+            type: array
+            items:
+              type: string
   /targets:
     get:
       tags:
-      - dictionaries
-      summary: Returns pet inventories by status
-      description: Returns a map of status codes to quantities
-      operationId: getInventory
+      - słowniki
+      summary: Wszystkie cele w wynikach ping
+      description: Może dodać jeszcze opcjonalne parametry takie jak w GET /pings?
       produces:
       - application/json
-      parameters: []
       responses:
         200:
-          description: successful operation
+          description: OK
           schema:
-            type: object
-            additionalProperties:
-              type: integer
-              format: int32
-      security:
-      - api_key: []
-securityDefinitions:
-  petstore_auth:
-    type: oauth2
-    authorizationUrl: http://petstore.swagger.io/oauth/dialog
-    flow: implicit
-    scopes:
-      write:pets: modify pets in your account
-      read:pets: read your pets
-  api_key:
-    type: apiKey
-    name: api_key
-    in: header
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
+            type: array
+            items:
+              type: string
+definitions:
+  PingResult:
+    type: object
+    required:
+    - time
+    - origin
+    - target
+    - success
+    - rtt
+    properties:
+      id:
+        type: integer
+        description: unikalne, nadawane przez magazyn, nie podawać przy wstawianiu
+        example: '367'
+      time:
+        type: string
+        description: czas wykonania testu w formacie tekstowym YYYYMMDDHHMMSS - porządek leksykograficzny pozwala porównywać tekstowo z prefiksami oznaczającymi grubsze jednostki czasu
+        example: '20170907094734'
+      origin:
+        type: string
+        description: określenie miejsca, z którego ping był wykonany
+        example: 'A8'
+      target:
+        type: string
+        description: bo można badać wiele różnych hostów
+        example: 'onet.pl'
+      success:
+        type: boolean
+        description: 0/1 w zależności od tego czy ping doszedł do skutku, w zadanym czasie granicznym) a może jednak zmienić w true/false ew. mapowane na 0/1 w bazie danych?
+        example: true
+        # enum:
+        # - 0
+        # - 1
+      rtt:
+        type: integer
+        description: liczba milisekund RTT, None/null? jeśli ping nie był skuteczy
+        example: '37'
+  PingAggregate:
+    type: object
+    required:
+    - start
+    - end
+    - expected
+    - actual
+    - avg-success
+    - avg-time
+    properties:
+      start:
+        type: string
+        description: Początkowy moment agregatu (włącznie z tym punktem, liczba końcowych zer zależna od poziomu agregacji)
+        example: 20170907220000
+      end:
+        type: string
+        description: Końcowy moment agregatu (bez tego punktu, liczba końcowych zer zależna od poziomu agregacji)
+        example: 20170907230000
+      expected:
+        type: integer
+        description: Oczekiwana liczba próbek w danym okresie (to przy założeniu, że kolejne próbki są np. dokładnie co 1 sekundę????? - skąd to wiadomo)
+        example: 86400
+      actual:
+        type: integer
+        description: Faktyczna liczna zarejestrowanych próbek
+        example: 84354
+      avg-success:
+        type: number
+        description: Współczynnik sukcesu wywołania ping (w ramach zarejestrowanych a nie oczekiwanych próbek)
+        example: 0.98
+      avg-time:
+        type: number
+        description: Średni czas rtt w danym okresie
+        example: 23.54
