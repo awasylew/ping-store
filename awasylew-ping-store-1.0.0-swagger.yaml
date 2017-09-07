@@ -1,0 +1,268 @@
+swagger: '2.0'
+info:
+  description: |
+    API do magazynu ping-store.
+  version: 1.0.0
+  title: ping-store
+basePath: /v1
+tags:
+- name: pings
+  description: Surowe zapisy pojedynczych pingów
+- name: aggregates
+  description: Agregacja pingów w minuty
+- name: dictionaries
+  description: Agregacja pingów w godziny
+schemes:
+- http
+paths:
+  /pings:
+    post:
+      tags:
+      - pings
+      summary: Add a new pet to the store
+      operationId: addPet
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/json
+      - application/xml
+      responses:
+        405:
+          description: Invalid input
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+    get:
+      tags:
+      - pings
+      summary: Update an existing pet
+      operationId: updatePet
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - in: body
+        name: body
+        description: Pet object that needs to be added to the store
+        required: true
+      responses:
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Pet not found
+        405:
+          description: Validation exception
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+    delete:
+      tags:
+        - pings
+      responses:
+        400:
+          description: Invalid ID supplied
+  /pings/{id}:
+    get:
+      tags:
+      - pings
+      summary: Update an existing pet
+      operationId: updatePet
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - in: path
+        name: body
+        description: Pet object that needs to be added to the store
+        required: true
+        schema:
+          $ref: '#/definitions/Pet'
+      responses:
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Pet not found
+        405:
+          description: Validation exception
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+  /minutes/{minute}:
+    get:
+      tags:
+      - aggregates
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: minute
+        in: path
+        description: Status values that need to be considered for filter
+        required: true
+        type: array
+        items:
+          type: string
+          enum:
+          - available
+          - pending
+          - sold
+          default: available
+        collectionFormat: multi
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+        400:
+          description: Invalid status value
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+  /hours/{hour}:
+    get:
+      tags:
+      - aggregates
+      summary: Finds Pets by tags
+      description: Muliple tags can be provided with comma separated strings. Use\
+        \ tag1, tag2, tag3 for testing.
+      operationId: findPetsByTags
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: hour
+        in: path
+        description: Tags to filter by
+        required: true
+        type: array
+        items:
+          type: string
+        collectionFormat: multi
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+        400:
+          description: Invalid tag value
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+  /days/{day}:
+    get:
+      tags:
+      - aggregates
+      summary: Find pet by ID
+      description: Returns a single pet
+      operationId: getPetById
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: day
+        in: path
+        description: ID of pet to return
+        required: true
+        type: integer
+        format: int64
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Pet'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Pet not found
+      security:
+      - api_key: []
+  /origins:
+    get:
+      tags:
+      - dictionaries
+      summary: uploads an image
+      operationId: uploadFile
+      consumes:
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - name: petId
+        in: path
+        description: ID of pet to update
+        required: true
+        type: integer
+        format: int64
+      - name: additionalMetadata
+        in: formData
+        description: Additional data to pass to server
+        required: false
+        type: string
+      - name: file
+        in: formData
+        description: file to upload
+        required: false
+        type: file
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponse'
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+  /targets:
+    get:
+      tags:
+      - dictionaries
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: getInventory
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: object
+            additionalProperties:
+              type: integer
+              format: int32
+      security:
+      - api_key: []
+securityDefinitions:
+  petstore_auth:
+    type: oauth2
+    authorizationUrl: http://petstore.swagger.io/oauth/dialog
+    flow: implicit
+    scopes:
+      write:pets: modify pets in your account
+      read:pets: read your pets
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
