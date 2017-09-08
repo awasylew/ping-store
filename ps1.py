@@ -14,6 +14,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
+@app.route('/makedb')
+def make_database():
+    db.create_all()
+    return 'db created!'
+
 class PingResult(db.Model):
     __tablename__ = 'ping_results'
 
@@ -77,8 +82,8 @@ def targets():
     q = query_add_args(q)
     return "<br>".join([ str(r) for r in q])
 
-#@app.route('/pings', methods=['POST'])
-@app.route('/pings-post')
+@app.route('/pings', methods=['POST'])
+@app.route('/pings-post')    # tymczasowo
 def pings_post():
     p1=PingResult(
         time=datetime.datetime.now().strftime('%Y%m%d%H%M%S'),
