@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 import random
 import datetime
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
