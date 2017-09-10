@@ -99,7 +99,8 @@ def pings_post():
 @app.route('/pings', methods=['DELETE'])
 @app.route('/pings-delete') # do testów
 def pings_delete():
-    db.session.query(PingResult).delete(synchronize_session=False)
+    q = db.session.query(PingResult)
+    query_add_args(q).delete(synchronize_session=False)
     db.session.commit()
     return 'deleted!'
 
