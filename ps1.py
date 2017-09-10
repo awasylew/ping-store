@@ -105,7 +105,7 @@ def pings_delete():
 
 @app.route('/')
 def root():
-    return '<!doctype html><html><body><a href=https://dashboard.heroku.com/apps/ping-store>manage app</a></body></html>'
+    return '<!doctype html><html><body><a target="_blank" href="https://dashboard.heroku.com/apps/ping-store">manage app</a></body></html>'
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT"))
