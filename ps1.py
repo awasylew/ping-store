@@ -103,7 +103,11 @@ def pings_delete():
     db.session.commit()
     return 'deleted!'
 
-# app.run(debug=True)
+@app.route('/')
+def root():
+    return '<!doctype html><html><body><a href=https://dashboard.heroku.com/apps/ping-store>manage app</a></body></html>'
+
 if __name__ == '__main__':
     port = int(os.getenv("PORT"))
-    app.run(host='0.0.0.0', port=port) 
+    # app.run(debug=True)
+    app.run(host='0.0.0.0', port=port)
