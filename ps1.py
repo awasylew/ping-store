@@ -13,6 +13,7 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_ECHO'] = True
+# app.config.update(dict(  PREFERRED_URL_SCHEME = 'https'))
 db = SQLAlchemy(app)
 
 @app.route('/makedb')
@@ -94,7 +95,7 @@ def pings_post():
     db.session.add(p1)
     db.session.commit()
     resp = app.make_response('posted!<br>' + str(p1))
-    resp.headers['Location'] = url_for('pings_get_id', id=p1.id)
+    resp.headers['Location'] = url_for('pings_get_id', id=p1.id, _scheme=request.scheme, _external=True)
     return resp
     # return 'posted!<br>' + str(p1)
 
