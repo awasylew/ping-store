@@ -1,8 +1,15 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
-* doczytać i potestować  (dziwne: udały się konkurencyjne zmiany)
-zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
+* swagger: przenieść do definicji wspólne parametry
+* dodać endpoint pings/{id} - zgodnie z tym, co na swaggerze
+* dodać kody błędów
+* dodać 200 do poprawnych wyników
+* zmienić wyniki z text/html na json
+* dodać warunki do targets/origins
+* podzielić dodawanie warunków na dwie części (?)
+* zmienić start/end na prefix (?, w niektórych kontekstach?)
+* robić dobrego POST pings, GET pings-post może pozostać do testów
 * sortowanie do sensownego działania limit i offset, opisać?
 * czy DELETE ma działać dokłanie tak samo jak GET (nie będzie wtedy idempotentne)
 * użycie poprawnych metod HTTP
@@ -11,8 +18,9 @@ zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekor
 * odczytywanie agregatów z pingów surowych
 * automatyczna agregacja
 * pamięć sond na wypadek przerwy w połączeniu
-* Swagger na API
-* testy jednostkowe
+* testy jednostkowe ???czy to ma sens
+* doczytać i potestować  (dziwne: udały się konkurencyjne zmiany)
+zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
 
 ## Opis komponentu
 

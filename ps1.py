@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 import random
 import datetime
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
@@ -83,7 +84,7 @@ def targets():
     return "<br>".join([ str(r) for r in q])
 
 @app.route('/pings', methods=['POST'])
-@app.route('/pings-post')    # tymczasowo
+@app.route('/pings-post')    # do testów
 def pings_post():
     p1=PingResult(
         time=datetime.datetime.now().strftime('%Y%m%d%H%M%S'),
@@ -95,11 +96,19 @@ def pings_post():
     db.session.commit()
     return 'posted!'
 
-#@app.route methods=DELETE
-@app.route('/pings-delete')
+@app.route('/pings', methods=['DELETE'])
+@app.route('/pings-delete') # do testów
 def pings_delete():
-    db.session.query(PingResult).delete(synchronize_session=False)
+    q = db.session.query(PingResult)
+    query_add_args(q).delete(synchronize_session=False)
     db.session.commit()
     return 'deleted!'
 
-app.run(debug=True)
+@app.route('/')
+def root():
+    return '<!doctype html><html><body><a target="_blank" href="https://dashboard.heroku.com/apps/ping-store">manage app</a></body></html>'
+
+if __name__ == '__main__':
+    port = int(os.getenv("PORT"))
+    # app.run(debug=True)
+    app.run(host='0.0.0.0', port=port)

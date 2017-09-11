@@ -1,0 +1,6 @@
+---
+applications:
+- name: ping-store
+  memory: 128M
+  instances: 1
+  host: ping-store
