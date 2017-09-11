@@ -1,3 +1,5 @@
 ve/
 __pycache__/
+
 pings.db
+setproxy.bat
