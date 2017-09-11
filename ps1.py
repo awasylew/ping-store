@@ -95,7 +95,10 @@ def pings_post():
     db.session.add(p1)
     db.session.commit()
     resp = app.make_response('posted!<br>' + str(p1))
-    resp.headers['Location'] = url_for('pings_get_id', id=p1.id, _scheme=request.scheme, _external=True) + request.scheme + request.headers['X-Forwarded-Proto']
+    scheme = request.headers.get('X-Forwarded-Proto')
+    if scheme is None:
+        scheme = request.scheme
+    resp.headers['Location'] = url_for('pings_get_id', id=p1.id, _scheme=scheme, _external=True)
     return resp
     # return 'posted!<br>' + str(p1)
 
