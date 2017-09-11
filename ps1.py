@@ -1,4 +1,4 @@
-from flask import Flask, request, url_for
+from flask import Flask, request, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 from sqlalchemy import create_engine
@@ -34,6 +34,10 @@ class PingResult(db.Model):
     def __repr__(self):
         return "PingResult(id=%s, time=%s, origin=%s, target=%s, succes=%s, rtt=%s)" % \
             (self.id, self.time, self.origin, self.target, self.success, self.rtt)
+    def toDict(self):
+        return {'id':self.id, 'time':str(self.time), \
+            'origin':str(self.origin), 'target':str(self.target), \
+            'success':self.success, 'rtt':self.rtt}	
 
 def query_add_args(q):
     id=request.args.get('id')
@@ -74,8 +78,12 @@ def pings_get():
 
 @app.route('/pings/<int:id>', methods=['GET'])
 def pings_get_id(id):
-    return 'single ping'
-	
+    q = db.session.query(PingResult).filter(PingResult.id==id)
+    pr = q.first()
+    if pr is None:
+        return 'Not found', 404
+#    return str(jsonify(dict(pr)))		
+    return jsonify(pr.toDict())
 	
 @app.route('/pings', methods=['POST'])
 @app.route('/pings-post')    # do testów
@@ -95,12 +103,11 @@ def pings_post():
     db.session.add(p1)
     db.session.commit()
     resp = app.make_response('posted!<br>' + str(p1))
-    scheme = request.headers.get('X-Forwarded-Proto')
+    scheme = request.headers.get('X-Forwarded-Proto')       # metoda specyficzna na heroku, czy będzie dobrze działać w innych układach?
     if scheme is None:
         scheme = request.scheme
     resp.headers['Location'] = url_for('pings_get_id', id=p1.id, _scheme=scheme, _external=True)
     return resp
-    # return 'posted!<br>' + str(p1)
 
 @app.route('/pings', methods=['DELETE'])
 @app.route('/pings-delete') # do testów

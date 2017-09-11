@@ -1,10 +1,9 @@
 swagger: '2.0'
 info:
-  description: |
-    API do magazynu ping-store.
+  description: API do magazynu ping-store.
   version: 1.0.0
   title: ping-store
-basePath: /v1
+basePath: /
 tags:
 - name: pings
   description: Surowe zapisy pojedynczych pingów
@@ -14,13 +13,14 @@ tags:
   description: Słowniki do zapytań (stworzone automatycznie z wyników ping)
 schemes:
 - http
-host: localhost
+# host: localhost:5000
+host: ping-store.herokuapp.com
 paths:
   /pings:
     post:
       tags:
       - pings
-      summary: Wstawianie wyników ping.
+      summary: Wstawianie wyników ping. 
       description: Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz.
       consumes:
       - "application/json"
@@ -34,8 +34,8 @@ paths:
         schema:
           $ref: '#/definitions/PingResult'
       responses:
-        200:
-          description: OK
+        201:
+          description: Created
           schema:
             type: integer
             example: 367
@@ -43,7 +43,7 @@ paths:
       tags:
       - pings
       summary: Pobiera wyniki ping
-      description: Zwraca tablicę wyników opcjonalnie spełniających podane kryteria.
+      description: Zwraca tablicę wyników opcjonalnie spełniających podane kryteria. A może zamiast start/end zrobić 
       parameters:
       - in: query
         name: limit
@@ -59,12 +59,12 @@ paths:
         name: origin
         description: Pobieraj tylko wyniki dla podanego źródła
         required: false
-        type: integer
+        type: string
       - in: query
         name: target
         description: Pobieraj tylko wyniki dla podanego celu
         required: false
-        type: integer
+        type: string
       - in: query
         name: start
         description: Pobieraj tylko wyniki z podanego czasu późniejsze (porządek leksykograficzny)
@@ -130,6 +130,7 @@ paths:
       - "application/json"
       produces:
       - "application/json"
+      - "text/html"
       parameters:
       - in: path
         name: ping-id
@@ -143,6 +144,15 @@ paths:
             $ref: '#/definitions/PingResult'
         404:
           description: Nie ma takiego wyniku
+  /minutes:
+    get:
+      tags: 
+      - agregaty
+      summary: Pobieranie dostępnych minut
+      description: Sensowne warunki limit, offset, start, end, origin, targt
+      responses:
+        200:
+          description: OK
   /minutes/{minute}:
     get:
       tags:
@@ -247,22 +257,22 @@ definitions:
         description: czas wykonania testu w formacie tekstowym YYYYMMDDHHMMSS - porządek leksykograficzny pozwala porównywać tekstowo z prefiksami oznaczającymi grubsze jednostki czasu
         example: '20170907094734'
       origin:
-        type: string
+        type: string 
         description: określenie miejsca, z którego ping był wykonany
         example: 'A8'
       target:
-        type: string
+        type: string 
         description: bo można badać wiele różnych hostów
         example: 'onet.pl'
       success:
-        type: boolean
+        type: boolean 
         description: 0/1 w zależności od tego czy ping doszedł do skutku, w zadanym czasie granicznym) a może jednak zmienić w true/false ew. mapowane na 0/1 w bazie danych?
         example: true
         # enum:
         # - 0
         # - 1
       rtt:
-        type: integer
+        type: integer 
         description: liczba milisekund RTT, None/null? jeśli ping nie był skuteczy
         example: '37'
   PingAggregate:
