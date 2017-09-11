@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 from sqlalchemy import create_engine
@@ -71,6 +71,41 @@ def pings_get():
     q = query_add_args(q)
     return "<br>".join([ str(r) for r in q])
 
+@app.route('/pings/<int:id>', methods=['GET'])
+def pings_get_id(id):
+    return 'single ping'
+	
+	
+@app.route('/pings', methods=['POST'])
+@app.route('/pings-post')    # do testów
+def pings_post():
+    time = request.args.get('time')
+    # kontrola czy jest
+    # kontrola czy poprawny
+    # kontrola czy nie odrzucić z powodu starości
+    origin = request.args.get('origin')
+    # kontrole ...
+    target = request.args.get('target')
+    # kontrole ...
+    success = request.args.get('success')
+    # kontrole ...
+    rtt = request.args.get('rtt')	
+    p1=PingResult( time=time, origin=origin, target=target, success=success, rtt=rtt)
+    db.session.add(p1)
+    db.session.commit()
+    resp = app.make_response('posted!<br>' + str(p1))
+    resp.headers['Location'] = url_for('pings_get_id', id=p1.id)
+    return resp
+    # return 'posted!<br>' + str(p1)
+
+@app.route('/pings', methods=['DELETE'])
+@app.route('/pings-delete') # do testów
+def pings_delete():
+    q = db.session.query(PingResult)
+    query_add_args(q).delete(synchronize_session=False)
+    db.session.commit()
+    return 'deleted!'
+
 @app.route('/origins')
 def origins():
     q = db.session.query(PingResult.origin).distinct()
@@ -82,28 +117,7 @@ def targets():
     q = db.session.query(PingResult.target).distinct()
     q = query_add_args(q)
     return "<br>".join([ str(r) for r in q])
-
-@app.route('/pings', methods=['POST'])
-@app.route('/pings-post')    # do testów
-def pings_post():
-    p1=PingResult(
-        time=datetime.datetime.now().strftime('%Y%m%d%H%M%S'),
-        origin=random.choice(['A8', 'RaspPi']),
-        target=random.choice(['onet.pl', 'wp.pl', 'rmf.pl']),
-        success=random.choice([0, 1]),
-        rtt=random.choice([1,2,4,8,16,32,64]))
-    db.session.add(p1)
-    db.session.commit()
-    return 'posted!'
-
-@app.route('/pings', methods=['DELETE'])
-@app.route('/pings-delete') # do testów
-def pings_delete():
-    q = db.session.query(PingResult)
-    query_add_args(q).delete(synchronize_session=False)
-    db.session.commit()
-    return 'deleted!'
-
+	
 @app.route('/')
 def root():
     return '<!doctype html><html><body><a target="_blank" href="https://dashboard.heroku.com/apps/ping-store">manage app</a></body></html>'
