@@ -103,8 +103,8 @@ def pings_post_general(args):
     # kontrole ...
     target = args.get('target')
     # kontrole ...
-    succ_arg = args.get('success')
-    success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
+    success = args.get('success')
+#    success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
 #    print(success)
     # kontrole ...
     rtt = args.get('rtt')
@@ -132,7 +132,13 @@ def pings_post():
 
 @app.route('/pings-post')    # do testów
 def pings_post_fake():
-    return pings_post_general( request.args )
+#    args = {dict(request.args)}
+    args = {k:request.args.get(k) for k in request.args}
+    print(args)
+    succ_arg = args.get('success')
+    success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
+    args['success'] = success
+    return pings_post_general( args )
 
 @app.route('/pings', methods=['DELETE'])
 @app.route('/pings-delete') # do testów
