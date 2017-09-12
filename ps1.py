@@ -1,9 +1,9 @@
-from flask import Flask, request, url_for, jsonify
+from flask import Flask, request, url_for, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 
 import random
@@ -28,16 +28,16 @@ class PingResult(db.Model):
     time = Column(String)
     origin = Column(String)
     target = Column(String)
-    success = Column(Integer)
+    success = Boolean(Integer)
     rtt = Column(Integer)
 
     def __repr__(self):
         return "PingResult(id=%s, time=%s, origin=%s, target=%s, succes=%s, rtt=%s)" % \
             (self.id, self.time, self.origin, self.target, self.success, self.rtt)
-    def toDict(self):
+    def toDict(self): # taka konwencja nazewnyczna zmiany typu na dict?
         return {'id':self.id, 'time':str(self.time), \
             'origin':str(self.origin), 'target':str(self.target), \
-            'success':self.success, 'rtt':self.rtt}	
+            'success':str(self.success), 'rtt':self.rtt}	
 
 def query_add_args(q):
     id=request.args.get('id')
@@ -88,6 +88,10 @@ def pings_get_id(id):
 @app.route('/pings', methods=['POST'])
 @app.route('/pings-post')    # do testów
 def pings_post():
+    id = request.args.get('id')
+	# dozwolony tutaj?
+	# kontrole
+	# błąd przy podaniu istniejącego
     time = request.args.get('time')
     # kontrola czy jest
     # kontrola czy poprawny
@@ -96,18 +100,26 @@ def pings_post():
     # kontrole ...
     target = request.args.get('target')
     # kontrole ...
-    success = request.args.get('success')
+    success = request.args.get('success').upper() not in ['FALSE', '0'] 
+    print(success)
     # kontrole ...
-    rtt = request.args.get('rtt')	
-    p1=PingResult( time=time, origin=origin, target=target, success=success, rtt=rtt)
-    db.session.add(p1)
+    rtt = request.args.get('rtt')
+
+    p = PingResult(id=id, time=time, origin=origin, target=target, success=success, rtt=rtt)
+    db.session.add(p)
     db.session.commit()
-    resp = app.make_response('posted!<br>' + str(p1))
+
+    # resp = app.make_response(jsonify(p.toDict()))
+
     scheme = request.headers.get('X-Forwarded-Proto')       # metoda specyficzna na heroku, czy będzie dobrze działać w innych układach?
     if scheme is None:
         scheme = request.scheme
-    resp.headers['Location'] = url_for('pings_get_id', id=p1.id, _scheme=scheme, _external=True)
-    return resp
+    
+    headers = {}
+    headers['Location'] = url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)
+    headers['Content-Type'] = 'application/json'
+    
+    return app.make_response((jsonify(p.toDict()), 201, headers)) 
 
 @app.route('/pings', methods=['DELETE'])
 @app.route('/pings-delete') # do testów
@@ -131,7 +143,8 @@ def targets():
 	
 @app.route('/')
 def root():
-    return '<!doctype html><html><body><a target="_blank" href="https://dashboard.heroku.com/apps/ping-store">manage app</a></body></html>'
+#    return '<!doctype html><html><body><a target="_blank" href="https://dashboard.heroku.com/apps/ping-store">manage app</a></body></html>'
+    return render_template('index.html')
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT"))

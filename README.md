@@ -1,6 +1,8 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
+* nie w porządku success-BOOLEAN
+* JSON PingStore - cudzysłowy w reprezentacji
 * swagger: przenieść do definicji wspólne parametry
 * dodać endpoint pings/{id} - zgodnie z tym, co na swaggerze
 * dodać kody błędów
@@ -21,6 +23,7 @@
 * testy jednostkowe ???czy to ma sens
 * doczytać i potestować  (dziwne: udały się konkurencyjne zmiany)
 zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
+* POST pings dodać sprawdzenie parametrów
 
 ## Opis komponentu
 
