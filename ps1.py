@@ -134,7 +134,7 @@ def pings_post():
 def pings_post_fake():
 #    args = {dict(request.args)}
     args = {k:request.args.get(k) for k in request.args}
-    print(args)
+#    print(args)
     succ_arg = args.get('success')
     success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
     args['success'] = success
