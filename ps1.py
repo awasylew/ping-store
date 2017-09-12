@@ -90,26 +90,24 @@ def pings_get_id(id):
         return 'Not found', 404
     return jsonify(pr.toDict()), 200
 
-@app.route('/pings', methods=['POST'])
-@app.route('/pings-post')    # do testów
-def pings_post():
-    id = request.args.get('id')
+def pings_post_general(args):
+    id = args.get('id')
 	# dozwolony tutaj?
 	# kontrole
 	# błąd przy podaniu istniejącego
-    time = request.args.get('time')
+    time = args.get('time')
     # kontrola czy jest
     # kontrola czy poprawny
     # kontrola czy nie odrzucić z powodu starości
-    origin = request.args.get('origin')
+    origin = args.get('origin')
     # kontrole ...
-    target = request.args.get('target')
+    target = args.get('target')
     # kontrole ...
-    succ_arg = request.args.get('success')
+    succ_arg = args.get('success')
     success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
 #    print(success)
     # kontrole ...
-    rtt = request.args.get('rtt')
+    rtt = args.get('rtt')
 
     p = PingResult(id=id, time=time, origin=origin, target=target, success=success, rtt=rtt)
     db.session.add(p)
@@ -127,6 +125,14 @@ def pings_post():
 
     return app.make_response((jsonify(p.toDict()), 201, \
         {'Location':  url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)}))
+
+@app.route('/pings', methods=['POST'])
+def pings_post():
+    return pings_post_general( request.json )
+
+@app.route('/pings-post')    # do testów
+def pings_post_fake():
+    return pings_post_general( request.args )
 
 @app.route('/pings', methods=['DELETE'])
 @app.route('/pings-delete') # do testów
