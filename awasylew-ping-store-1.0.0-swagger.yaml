@@ -21,7 +21,7 @@ paths:
       tags:
       - pings
       summary: Wstawianie wyników ping. 
-      description: Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz.
+      description: 'Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz. **TODO: kontrola parametrów, błędy**'
       consumes:
       - "application/json"
       produces:
@@ -37,8 +37,7 @@ paths:
         201:
           description: Created
           schema:
-            type: integer
-            example: 367
+            $ref: '#/definitions/PingResult'
     get:
       tags:
       - pings

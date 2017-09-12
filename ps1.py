@@ -13,7 +13,6 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_ECHO'] = True
-# app.config.update(dict(  PREFERRED_URL_SCHEME = 'https'))
 db = SQLAlchemy(app)
 
 @app.route('/makedb')
@@ -28,53 +27,60 @@ class PingResult(db.Model):
     time = Column(String)
     origin = Column(String)
     target = Column(String)
-    success = Boolean(Integer)
+    success = Column(Boolean)
     rtt = Column(Integer)
 
     def __repr__(self):
         return "PingResult(id=%s, time=%s, origin=%s, target=%s, succes=%s, rtt=%s)" % \
             (self.id, self.time, self.origin, self.target, self.success, self.rtt)
-    def toDict(self): # taka konwencja nazewnyczna zmiany typu na dict?
+    def toDict(self):                   # taka konwencja nazewnyczna zmiany typu na dict?
         return {'id':self.id, 'time':str(self.time), \
             'origin':str(self.origin), 'target':str(self.target), \
-            'success':str(self.success), 'rtt':self.rtt}	
+            'success':self.success, 'rtt':self.rtt}
 
-def query_add_args(q):
+def query_add_args_id(q):
     id=request.args.get('id')
     if id is not None:
         q = q.filter(PingResult.id == id)
+    return q
 
+def query_add_args_time(q):
     start=request.args.get('start')
     if start is not None:
         q = q.filter(PingResult.time >= start)
-
     end=request.args.get('end')
     if end is not None:
         q = q.filter(PingResult.time < end)
+    return q
 
+def query_add_args_hosts(q):
     origin=request.args.get('origin')
     if origin is not None:
         q = q.filter(PingResult.origin == origin)
-
     target=request.args.get('target')
     if target is not None:
         q = q.filter(PingResult.target == target)
+    return q
 
+def query_add_args_window(q):
     limit=request.args.get('limit')
     if limit is not None:
         q = q.limit(limit)
-
     offset=request.args.get('offset')
     if offset is not None:
         q = q.offset(offset)
-
     return q
+
 
 @app.route('/pings', methods=['GET'])
 def pings_get():
     q = db.session.query(PingResult)
-    q = query_add_args(q)
-    return "<br>".join([ str(r) for r in q])
+    q = query_add_args_id(q)
+    q = query_add_args_time(q)
+    q = query_add_args_hosts(q)
+    q = query_add_args_window(q)
+    l = [i.toDict() for i in q]
+    return jsonify(l), 200
 
 @app.route('/pings/<int:id>', methods=['GET'])
 def pings_get_id(id):
@@ -82,9 +88,8 @@ def pings_get_id(id):
     pr = q.first()
     if pr is None:
         return 'Not found', 404
-#    return str(jsonify(dict(pr)))		
-    return jsonify(pr.toDict())
-	
+    return jsonify(pr.toDict()), 200
+
 @app.route('/pings', methods=['POST'])
 @app.route('/pings-post')    # do testów
 def pings_post():
@@ -100,8 +105,9 @@ def pings_post():
     # kontrole ...
     target = request.args.get('target')
     # kontrole ...
-    success = request.args.get('success').upper() not in ['FALSE', '0'] 
-    print(success)
+    succ_arg = request.args.get('success')
+    success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
+#    print(success)
     # kontrole ...
     rtt = request.args.get('rtt')
 
@@ -114,33 +120,52 @@ def pings_post():
     scheme = request.headers.get('X-Forwarded-Proto')       # metoda specyficzna na heroku, czy będzie dobrze działać w innych układach?
     if scheme is None:
         scheme = request.scheme
-    
-    headers = {}
-    headers['Location'] = url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)
-    headers['Content-Type'] = 'application/json'
-    
-    return app.make_response((jsonify(p.toDict()), 201, headers)) 
+
+#    headers = {}
+#    headers['Location'] = url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)
+#    headers['Content-Type'] = 'application/json'      # niepotrzebne, bo jsonify już ustawia Content-Type
+
+    return app.make_response((jsonify(p.toDict()), 201, \
+        {'Location':  url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)}))
 
 @app.route('/pings', methods=['DELETE'])
 @app.route('/pings-delete') # do testów
 def pings_delete():
     q = db.session.query(PingResult)
-    query_add_args(q).delete(synchronize_session=False)
+#    query_add_args(q).delete(synchronize_session=False)
+    q = query_add_args_id(q)
+    q = query_add_args_time(q)
+    q = query_add_args_hosts(q)
+#    q = query_add_args_window(q)
+    q.delete(synchronize_session=False)
     db.session.commit()
-    return 'deleted!'
+    return 'deleted!', 204
 
 @app.route('/origins')
 def origins():
     q = db.session.query(PingResult.origin).distinct()
-    q = query_add_args(q)
-    return "<br>".join([ str(r) for r in q])
+#    q = query_add_args(q)
+# a może rónież wg id?
+    q = query_add_args_id(q)
+    q = query_add_args_time(q)
+    q = query_add_args_hosts(q)
+#    q = query_add_args_window(q)
+    l = [i[0] for i in q]
+    return jsonify(l), 200
+#    return "<br>".join([ str(r) for r in q]), 200
 
 @app.route('/targets')
 def targets():
     q = db.session.query(PingResult.target).distinct()
-    q = query_add_args(q)
-    return "<br>".join([ str(r) for r in q])
-	
+#    q = query_add_args(q)
+# a może rónież wg id?
+    q = query_add_args_time(q)
+    q = query_add_args_hosts(q)
+#    q = query_add_args_window(q)
+    l = [i[0] for i in q]
+    return jsonify(l), 200
+#    return "<br>".join([ str(r) for r in q]), 200
+
 @app.route('/')
 def root():
 #    return '<!doctype html><html><body><a target="_blank" href="https://dashboard.heroku.com/apps/ping-store">manage app</a></body></html>'

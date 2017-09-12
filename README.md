@@ -1,21 +1,10 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
-* nie w porządku success-BOOLEAN
-* JSON PingStore - cudzysłowy w reprezentacji
-* swagger: przenieść do definicji wspólne parametry
-* dodać endpoint pings/{id} - zgodnie z tym, co na swaggerze
-* dodać kody błędów
-* dodać 200 do poprawnych wyników
-* zmienić wyniki z text/html na json
-* dodać warunki do targets/origins
-* podzielić dodawanie warunków na dwie części (?)
+* dodać kody błędów do swaggera i do kodu
 * zmienić start/end na prefix (?, w niektórych kontekstach?)
-* robić dobrego POST pings, GET pings-post może pozostać do testów
 * sortowanie do sensownego działania limit i offset, opisać?
-* czy DELETE ma działać dokłanie tak samo jak GET (nie będzie wtedy idempotentne)
-* użycie poprawnych metod HTTP
-* zapisywanie jednego pinga
+* użycie poprawnych metod HTTP -> testowanie przez swaggerhub
 * napisać ping-probe
 * odczytywanie agregatów z pingów surowych
 * automatyczna agregacja
