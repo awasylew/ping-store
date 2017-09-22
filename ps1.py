@@ -18,7 +18,14 @@ db = SQLAlchemy(app)
 @app.route('/makedb')
 def make_database():
     db.create_all()
-    return 'db created!'
+    return 'db created!', 200
+
+@app.route('/sample-results')
+def sample_results():
+    pings_post_generic({'origin':'sample-a', 'target':'sample-1', 'success':True, 'rtt':1, 'time':'20170922090433'})
+    pings_post_generic({'origin':'sample-a', 'target':'sample-2', 'success':True, 'rtt':3, 'time':'20170922090434'})
+    pings_post_generic({'origin':'sample-a', 'target':'sample-3', 'success':True, 'rtt':15, 'time':'20170922090435'})
+    return 'posted!', 200
 
 class PingResult(db.Model):
     __tablename__ = 'ping_results'
@@ -71,7 +78,6 @@ def query_add_args_window(q):
         q = q.offset(offset)
     return q
 
-
 @app.route('/pings', methods=['GET'])
 def pings_get():
     q = db.session.query(PingResult)
@@ -90,7 +96,9 @@ def pings_get_id(id):
         return 'Not found', 404
     return jsonify(pr.toDict()), 200
 
-def pings_post_general(args):
+def pings_post_generic(args):
+    # args powinno być neutralnym słownikiem, a nie dopasowage do request!
+
     id = args.get('id')
 	# dozwolony tutaj?
 	# kontrole
@@ -128,17 +136,17 @@ def pings_post_general(args):
 
 @app.route('/pings', methods=['POST'])
 def pings_post():
-    return pings_post_general( request.json )
+    return pings_post_generic( request.json )
 
 @app.route('/pings-post')    # do testów
-def pings_post_fake():
+def pings_post_pseudo():
 #    args = {dict(request.args)}
     args = {k:request.args.get(k) for k in request.args}
 #    print(args)
     succ_arg = args.get('success')
     success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
     args['success'] = success
-    return pings_post_general( args )
+    return pings_post_generic( args )
 
 @app.route('/pings', methods=['DELETE'])
 @app.route('/pings-delete') # do testów
@@ -166,6 +174,14 @@ def origins():
     return jsonify(l), 200
 #    return "<br>".join([ str(r) for r in q]), 200
 
+@app.route('/minutes')
+def get_minutes():
+	return 'dummy :('
+
+@app.route('/hours')
+def get_hours():
+	return 'dummy :('
+
 @app.route('/targets')
 def targets():
     q = db.session.query(PingResult.target).distinct()
@@ -174,7 +190,14 @@ def targets():
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
 #    q = query_add_args_window(q)
-    l = [i[0] for i in q]
+    l = []
+    for i in q:
+        name = i[0]
+        links = []
+        links.append({'rel':'pings', 'href':url_for('pings_get', target=name,_external=True)})
+        links.append({'rel':'minutes', 'href':url_for('get_minutes', target=name,_external=True)})
+        links.append({'rel':'hours', 'href':url_for('get_hours', target=name,_external=True)})
+        l.append({'name':name, 'links':links})
     return jsonify(l), 200
 #    return "<br>".join([ str(r) for r in q]), 200
 
