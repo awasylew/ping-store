@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func
 
 import random
 import datetime
@@ -22,9 +23,15 @@ def make_database():
 
 @app.route('/sample-results')
 def sample_results():
+    time=datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    """
     pings_post_generic({'origin':'sample-a', 'target':'sample-1', 'success':True, 'rtt':1, 'time':'20170922090433'})
     pings_post_generic({'origin':'sample-a', 'target':'sample-2', 'success':True, 'rtt':3, 'time':'20170922090434'})
     pings_post_generic({'origin':'sample-a', 'target':'sample-3', 'success':True, 'rtt':15, 'time':'20170922090435'})
+    """
+    pings_post_generic({'origin':'sample-a', 'target':'sample-1', 'success':True, 'rtt':1, 'time':time})
+    pings_post_generic({'origin':'sample-a', 'target':'sample-2', 'success':True, 'rtt':3, 'time':time})
+    pings_post_generic({'origin':'sample-a', 'target':'sample-3', 'success':True, 'rtt':15, 'time':time})
     return 'posted!', 200
 
 class PingResult(db.Model):
@@ -176,11 +183,28 @@ def origins():
 
 @app.route('/minutes')
 def get_minutes():
-	return 'dummy :('
+    q = db.session.query(PingResult.origin, PingResult.target, func.substr(PingResult.time,1,12)).distinct()
+    l = [{'origin':i[0], 'target':i[1], 'minute':i[2]} for i in q]
+    l = []
+    for i in q:
+        origin = i[0]
+        target = i[1]
+        minute = i[2]
+        """
+        links = []
+        links.append({'rel':'pings', 'href':url_for('pings_get', target=name,_external=True)})
+        links.append({'rel':'minutes', 'href':url_for('get_minutes', target=name,_external=True)})
+        links.append({'rel':'hours', 'href':url_for('get_hours', target=name,_external=True)})
+        """
+        l.append({'origin':origin, 'target':target, 'minute':minute, \
+           'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, target=target, _external=True)}]})
+    return jsonify(l), 200
 
 @app.route('/hours')
 def get_hours():
-	return 'dummy :('
+    q = db.session.query(func.substr(PingResult.time,1,10)).distinct()
+    l = [i[0] for i in q]
+    return jsonify(l), 200
 
 @app.route('/targets')
 def targets():

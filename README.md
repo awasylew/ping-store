@@ -1,6 +1,10 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
+* PILNE: dokończyć linki do minut i godzin, dodać time_prefix jako argument zapytania
+* środowisko: tworzenie venv skryptem
+* środowisko: ścisłe wersje w pip, kontrolowany proces upgrade
+* komponenty?: testowanie przynajmniej okresowo (do automatów: zawsze?) również z MySQL (szczególnie: func.substr)
 * dodać kody błędów do swaggera i do kodu
 * zmienić start/end na prefix (?, w niektórych kontekstach?)
 * sortowanie do sensownego działania limit i offset, opisać?
