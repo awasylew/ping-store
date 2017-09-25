@@ -65,6 +65,9 @@ def query_add_args_time(q):
     end=request.args.get('end')
     if end is not None:
         q = q.filter(PingResult.time < end)
+    prefix=request.args.get('time_prefix')
+    if prefix is not None:
+        q = q.filter(PingResult.time.like(prefix+'%'))
     return q
 
 def query_add_args_hosts(q):
@@ -197,7 +200,8 @@ def get_minutes():
         links.append({'rel':'hours', 'href':url_for('get_hours', target=name,_external=True)})
         """
         l.append({'origin':origin, 'target':target, 'minute':minute, \
-           'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, target=target, _external=True)}]})
+           'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, \
+           target=target, time_prefix=minute, _external=True)}]})
     return jsonify(l), 200
 
 @app.route('/hours')

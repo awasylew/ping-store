@@ -1,7 +1,6 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
-* PILNE: dokończyć linki do minut i godzin, dodać time_prefix jako argument zapytania
 * środowisko: tworzenie venv skryptem
 * środowisko: ścisłe wersje w pip, kontrolowany proces upgrade
 * komponenty?: testowanie przynajmniej okresowo (do automatów: zawsze?) również z MySQL (szczególnie: func.substr)
