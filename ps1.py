@@ -172,62 +172,81 @@ def pings_delete():
     return 'deleted!', 204
 
 @app.route('/origins')
-def origins():
+def get_origins():
     q = db.session.query(PingResult.origin).distinct()
-#    q = query_add_args(q)
-# a może rónież wg id?
     q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
 #    q = query_add_args_window(q)
-    l = [i[0] for i in q]
+#    l = [i[0] for i in q]
+#    return jsonify(l), 200
+    l = []
+    for i in q:
+        origin = i[0]
+        links = []
+#        links.append({'rel':'pings', 'href':url_for('pings_get', target=origin, _external=True)})
+#        links.append({'rel':'minutes', 'href':url_for('get_minutes', target=origin, _external=True)})
+#        links.append({'rel':'hours', 'href':url_for('get_hours', target=origin, _external=True)})
+        links.append({'rel':'targets', 'href':url_for('get_targets', origin=origin,_external=True)})
+        l.append({'origin':origin, 'links':links})
+    return jsonify(l), 200
+
+@app.route('/targets')
+def get_targets():
+    q = db.session.query(PingResult.origin, PingResult.target).distinct() # tak na sztywno czy wg argumentów?
+    q = query_add_args_id(q)
+    q = query_add_args_time(q)
+    q = query_add_args_hosts(q)
+#    q = query_add_args_window(q)
+    l = []
+    for i in q:
+        origin = i[0]
+        target = i[1]
+        links = []
+        links.append({'rel':'pings', 'href':url_for('pings_get', origin=origin, target=target, _external=True)})
+        links.append({'rel':'minutes', 'href':url_for('get_minutes', origin=origin, target=target, _external=True)})
+        links.append({'rel':'hours', 'href':url_for('get_hours', origin=origin, target=target, _external=True)})
+        l.append({'target':target, 'links':links})
     return jsonify(l), 200
 #    return "<br>".join([ str(r) for r in q]), 200
 
 @app.route('/minutes')
 def get_minutes():
-    q = db.session.query(PingResult.origin, PingResult.target, func.substr(PingResult.time,1,12)).distinct()
-    l = [{'origin':i[0], 'target':i[1], 'minute':i[2]} for i in q]
+    return get_periods('minute', 12)
+
+@app.route('/hours')
+def get_hours():
+    return get_periods('hour', 10)
+
+def get_periods( period_name, prefix_len ):
+    q = db.session.query(PingResult.origin, PingResult.target, \
+        func.substr(PingResult.time,1,prefix_len)).distinct()
+    q = query_add_args_id(q)
+    q = query_add_args_time(q)
+    q = query_add_args_hosts(q)
     l = []
     for i in q:
         origin = i[0]
         target = i[1]
-        minute = i[2]
+        prefix = i[2]
         """
         links = []
         links.append({'rel':'pings', 'href':url_for('pings_get', target=name,_external=True)})
         links.append({'rel':'minutes', 'href':url_for('get_minutes', target=name,_external=True)})
         links.append({'rel':'hours', 'href':url_for('get_hours', target=name,_external=True)})
         """
-        l.append({'origin':origin, 'target':target, 'minute':minute, \
+        l.append({'origin':origin, 'target':target, period_name:prefix, \
            'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, \
-           target=target, time_prefix=minute, _external=True)}]})
+           target=target, time_prefix=prefix, _external=True)}]})
     return jsonify(l), 200
 
+"""
 @app.route('/hours')
 def get_hours():
     q = db.session.query(func.substr(PingResult.time,1,10)).distinct()
     l = [i[0] for i in q]
     return jsonify(l), 200
-
-@app.route('/targets')
-def targets():
-    q = db.session.query(PingResult.target).distinct()
-#    q = query_add_args(q)
-# a może rónież wg id?
-    q = query_add_args_time(q)
-    q = query_add_args_hosts(q)
-#    q = query_add_args_window(q)
-    l = []
-    for i in q:
-        name = i[0]
-        links = []
-        links.append({'rel':'pings', 'href':url_for('pings_get', target=name,_external=True)})
-        links.append({'rel':'minutes', 'href':url_for('get_minutes', target=name,_external=True)})
-        links.append({'rel':'hours', 'href':url_for('get_hours', target=name,_external=True)})
-        l.append({'name':name, 'links':links})
-    return jsonify(l), 200
-#    return "<br>".join([ str(r) for r in q]), 200
+"""
 
 @app.route('/')
 def root():
