@@ -31,7 +31,7 @@ def sample_results():
     """
     pings_post_generic({'origin':'sample-a', 'target':'sample-1', 'success':True, 'rtt':1, 'time':time})
     pings_post_generic({'origin':'sample-a', 'target':'sample-2', 'success':True, 'rtt':3, 'time':time})
-    pings_post_generic({'origin':'sample-a', 'target':'sample-3', 'success':True, 'rtt':15, 'time':time})
+    pings_post_generic({'origin':'sample-a', 'target':'sample-3', 'success':False, 'rtt':None, 'time':time})
     return 'posted!', 200
 
 class PingResult(db.Model):
@@ -229,15 +229,15 @@ def get_periods( period_name, prefix_len ):
         origin = i[0]
         target = i[1]
         prefix = i[2]
-        """
-        links = []
-        links.append({'rel':'pings', 'href':url_for('pings_get', target=name,_external=True)})
-        links.append({'rel':'minutes', 'href':url_for('get_minutes', target=name,_external=True)})
-        links.append({'rel':'hours', 'href':url_for('get_hours', target=name,_external=True)})
-        """
+        count1 = query_add_args_id(query_add_args_hosts(query_add_args_time( \
+            db.session.query(PingResult.origin)))).\
+            filter(PingResult.time.like(prefix+'%'))
+        count_all = count1.count()
+        count_success = count1.filter(PingResult.success == True).count()
         l.append({'origin':origin, 'target':target, period_name:prefix, \
-           'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, \
-           target=target, time_prefix=prefix, _external=True)}]})
+            'count':count_all, 'count_success':count_success,
+            'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, \
+                target=target, time_prefix=prefix, _external=True)}]})
     return jsonify(l), 200
 
 """
