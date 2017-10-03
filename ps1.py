@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, Float
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
 
@@ -19,12 +19,16 @@ db = SQLAlchemy(app)
 @app.route('/makedb')
 def make_database():
     """zainicjowanie schematu bazy danych (potrzebne szczególnie dla baz ulotnych, typowo w pamięci)"""
+    """test: brak bazy, operacja bazodanowa powoduje błąd"""
+    """test: brak bazy, make_database(), operacja bazodanowa się udaje"""
     db.create_all()
     return 'db created!', 200
 
 @app.route('/sample-results')
 def sample_results():
     """wstawienie przykładowych wyników ping (wartości losowe, czas bieżący)"""
+    """test: pusta baza, sample_results(), w bazie 100 wyników"""
+    """test: pusta baza, sample_results(), wstawione wartości ograniczone do dozwolonych zbiorów/zakresów, w tym rtt null wiw brak sukcesu"""
     time=datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     for i in range(100):
         rtt = float(random.randrange(50))/10
@@ -43,7 +47,7 @@ class PingResult(db.Model):
     origin = Column(String)
     target = Column(String)
     success = Column(Boolean)
-    rtt = Column(Integer)
+    rtt = Column(Float)
 
     def __repr__(self):
         return "PingResult(id=%s, time=%s, origin=%s, target=%s, succes=%s, rtt=%s)" % \
