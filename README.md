@@ -1,6 +1,10 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
+* testy jednostkowe ??? ale jak
+* testy z innymi bazami danych (MySQL, PostgreSQL)
+* testy z indeksem na time, inne indeksy?
+* wyniki jako JSON albo XML na podstawie Accept? przynajmniej w niektórych miejscach?
 * środowisko: tworzenie venv skryptem
 * środowisko: ścisłe wersje w pip, kontrolowany proces upgrade
 * komponenty?: testowanie przynajmniej okresowo (do automatów: zawsze?) również z MySQL (szczególnie: func.substr)
@@ -8,11 +12,9 @@
 * zmienić start/end na prefix (?, w niektórych kontekstach?)
 * sortowanie do sensownego działania limit i offset, opisać?
 * użycie poprawnych metod HTTP -> testowanie przez swaggerhub
-* napisać ping-probe
 * odczytywanie agregatów z pingów surowych
 * automatyczna agregacja
 * pamięć sond na wypadek przerwy w połączeniu
-* testy jednostkowe ???czy to ma sens
 * doczytać i potestować  (dziwne: udały się konkurencyjne zmiany)
 zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
 * POST pings dodać sprawdzenie parametrów

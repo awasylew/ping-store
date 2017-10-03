@@ -16,6 +16,26 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
+class PingResult(db.Model):
+    """główna treść bazy danych ping - wynik pojedynczego wywołania"""
+
+    __tablename__ = 'ping_results'
+
+    id = Column(Integer, primary_key=True)
+    time = Column(String)                   #YYYYmmddHHMMSS
+    origin = Column(String)
+    target = Column(String)
+    success = Column(Boolean)
+    rtt = Column(Float)
+
+    def __repr__(self):
+        return "PingResult(id=%s, time=%s, origin=%s, target=%s, succes=%s, rtt=%s)" % \
+            (self.id, self.time, self.origin, self.target, self.success, self.rtt)
+    def to_dict(self):
+        return {'id':self.id, 'time':str(self.time), \
+            'origin':str(self.origin), 'target':str(self.target), \
+            'success':self.success, 'rtt':self.rtt}
+
 @app.route('/makedb')
 def make_database():
     """zainicjowanie schematu bazy danych (potrzebne szczególnie dla baz ulotnych, typowo w pamięci)"""
@@ -39,62 +59,61 @@ def sample_results():
             'success':bool(rtt>0), 'rtt':rtt if rtt>0 else None, 'time':time})
     return 'posted!', 200
 
-class PingResult(db.Model):
-    __tablename__ = 'ping_results'
-
-    id = Column(Integer, primary_key=True)
-    time = Column(String)                   #YYYYmmddHHMMSS
-    origin = Column(String)
-    target = Column(String)
-    success = Column(Boolean)
-    rtt = Column(Float)
-
-    def __repr__(self):
-        return "PingResult(id=%s, time=%s, origin=%s, target=%s, succes=%s, rtt=%s)" % \
-            (self.id, self.time, self.origin, self.target, self.success, self.rtt)
-    def to_dict(self):
-        return {'id':self.id, 'time':str(self.time), \
-            'origin':str(self.origin), 'target':str(self.target), \
-            'success':self.success, 'rtt':self.rtt}
-
 def query_add_args_id(q):
-    id=request.args.get('id')
+    """dodanie do zapytania SQLAlchemy warunku na id jeśli występuje w parametrach wywołania HTTP"""
+    """test: jest id w parametrach, nie ma id w zapytaniu, querry_add...(), jest id w zapytaniu, dobry warunek, dobra wartość"""
+    """test: nie ma id w parametrach, nie ma id zapytaniu, querry_add...(), nie ma id w zapytaniu"""
+    id = request.args.get('id')
     if id is not None:
-        q = q.filter(PingResult.id == id)
+        q = q.filter(PingResult.id==id)
     return q
 
 def query_add_args_time(q):
-    start=request.args.get('start')
+    """dodanie do zapytania SQLAlchemy warunków czasowych jeśli występują w parametrach wywołania HTTP"""
+    """test: ..."""
+    start = request.args.get('start')
     if start is not None:
-        q = q.filter(PingResult.time >= start)
-    end=request.args.get('end')
+        q = q.filter(PingResult.time>=start)
+    end = request.args.get('end')
     if end is not None:
-        q = q.filter(PingResult.time < end)
-    prefix=request.args.get('time_prefix')
+        q = q.filter(PingResult.time<end)
+    prefix = request.args.get('time_prefix')
     if prefix is not None:
         q = q.filter(PingResult.time.like(prefix+'%'))
     return q
 
 def query_add_args_hosts(q):
-    origin=request.args.get('origin')
+    """dodanie do zapytania SQLAlchemy warunków dotyczących hostów jeśli występują w parametrach wywołania HTTP"""
+    """test: ..."""
+    origin = request.args.get('origin')
     if origin is not None:
-        q = q.filter(PingResult.origin == origin)
-    target=request.args.get('target')
+        q = q.filter(PingResult.origin==origin)
+    target = request.args.get('target')
     if target is not None:
-        q = q.filter(PingResult.target == target)
+        q = q.filter(PingResult.target==target)
     return q
 
 def query_add_args_window(q):
-    limit=request.args.get('limit')
+    """dodanie do zapytania SQLAlchemy warunków ograniczająych liczbę wyników jeśli występują w parametrach wywołania HTTP"""
+    """test: ..."""
+    limit = request.args.get('limit')
     if limit is not None:
         q = q.limit(limit)
-    offset=request.args.get('offset')
+    offset = request.args.get('offset')
     if offset is not None:
         q = q.offset(offset)
     return q
 
-@app.route('/pings', methods=['GET'])
+@app.route('/pings')
 def pings_get():
+    """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
+    """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
+    """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
+    """test: przykładowa baza danych, wywołanie z start, odpowiednia licznośc wyniku"""
+    """test: przykładowa baza danych, wywołanie z end, odpowiednia liczność wyniku"""
+    """test: przykładowa baza danych, wywołanie z prefix, odpowiednia liczność wyniku"""
+    """test: ..."""
+    # czy to jest ok, że pusty zbiór nie jest błędem? (a w /pings/123 to już błąd)
     q = db.session.query(PingResult)
     q = query_add_args_id(q)
     q = query_add_args_time(q)
@@ -103,13 +122,15 @@ def pings_get():
     l = [i.to_dict() for i in q]
     return jsonify(l), 200
 
-@app.route('/pings/<int:id>', methods=['GET'])
+@app.route('/pings/<int:id>')
 def pings_get_id(id):
+    """zwrócenie pojedynczego wyniku wg id w ścieżce"""
+    """test: ..."""
     q = db.session.query(PingResult).filter(PingResult.id==id)
-    pr = q.first()
-    if pr is None:
+    r = q.first()
+    if r is None:
         return 'Not found', 404
-    return jsonify(pr.to_dict()), 200
+    return jsonify(r.to_dict()), 200
 
 def pings_post_generic(args):
     # args powinno być neutralnym słownikiem, a nie dopasowage do request!
