@@ -18,27 +18,28 @@ db = SQLAlchemy(app)
 
 @app.route('/makedb')
 def make_database():
+    """zainicjowanie schematu bazy danych (potrzebne szczególnie dla baz ulotnych, typowo w pamięci)"""
     db.create_all()
     return 'db created!', 200
 
 @app.route('/sample-results')
 def sample_results():
+    """wstawienie przykładowych wyników ping (wartości losowe, czas bieżący)"""
     time=datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    """
-    pings_post_generic({'origin':'sample-a', 'target':'sample-1', 'success':True, 'rtt':1, 'time':'20170922090433'})
-    pings_post_generic({'origin':'sample-a', 'target':'sample-2', 'success':True, 'rtt':3, 'time':'20170922090434'})
-    pings_post_generic({'origin':'sample-a', 'target':'sample-3', 'success':True, 'rtt':15, 'time':'20170922090435'})
-    """
-    pings_post_generic({'origin':'sample-a', 'target':'sample-1', 'success':True, 'rtt':1, 'time':time})
-    pings_post_generic({'origin':'sample-a', 'target':'sample-2', 'success':True, 'rtt':3, 'time':time})
-    pings_post_generic({'origin':'sample-a', 'target':'sample-3', 'success':False, 'rtt':None, 'time':time})
+    for i in range(100):
+        rtt = float(random.randrange(50))/10
+        if rtt < 0.2:
+            rtt = 0.0
+        pings_post_generic({'origin':'sample-'+random.choice(['a', 'b', 'c']), \
+            'target':'sample-'+random.choice(['1', '2', '3']), \
+            'success':bool(rtt>0), 'rtt':rtt if rtt>0 else None, 'time':time})
     return 'posted!', 200
 
 class PingResult(db.Model):
     __tablename__ = 'ping_results'
 
     id = Column(Integer, primary_key=True)
-    time = Column(String)
+    time = Column(String)                   #YYYYmmddHHMMSS
     origin = Column(String)
     target = Column(String)
     success = Column(Boolean)
