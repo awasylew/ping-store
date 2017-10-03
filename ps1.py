@@ -52,7 +52,7 @@ class PingResult(db.Model):
     def __repr__(self):
         return "PingResult(id=%s, time=%s, origin=%s, target=%s, succes=%s, rtt=%s)" % \
             (self.id, self.time, self.origin, self.target, self.success, self.rtt)
-    def toDict(self):                   # taka konwencja nazewnyczna zmiany typu na dict?
+    def to_dict(self):
         return {'id':self.id, 'time':str(self.time), \
             'origin':str(self.origin), 'target':str(self.target), \
             'success':self.success, 'rtt':self.rtt}
@@ -100,7 +100,7 @@ def pings_get():
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
     q = query_add_args_window(q)
-    l = [i.toDict() for i in q]
+    l = [i.to_dict() for i in q]
     return jsonify(l), 200
 
 @app.route('/pings/<int:id>', methods=['GET'])
@@ -109,7 +109,7 @@ def pings_get_id(id):
     pr = q.first()
     if pr is None:
         return 'Not found', 404
-    return jsonify(pr.toDict()), 200
+    return jsonify(pr.to_dict()), 200
 
 def pings_post_generic(args):
     # args powinno być neutralnym słownikiem, a nie dopasowage do request!
@@ -136,7 +136,7 @@ def pings_post_generic(args):
     db.session.add(p)
     db.session.commit()
 
-    # resp = app.make_response(jsonify(p.toDict()))
+    # resp = app.make_response(jsonify(p.to_dict()))
 
     scheme = request.headers.get('X-Forwarded-Proto')       # metoda specyficzna na heroku, czy będzie dobrze działać w innych układach?
     if scheme is None:
@@ -146,7 +146,7 @@ def pings_post_generic(args):
 #    headers['Location'] = url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)
 #    headers['Content-Type'] = 'application/json'      # niepotrzebne, bo jsonify już ustawia Content-Type
 
-    return app.make_response((jsonify(p.toDict()), 201, \
+    return app.make_response((jsonify(p.to_dict()), 201, \
         {'Location':  url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)}))
 
 @app.route('/pings', methods=['POST'])
