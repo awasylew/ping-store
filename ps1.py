@@ -246,22 +246,32 @@ def get_hours():
 
 def get_periods( period_name, prefix_len ):
     q = db.session.query(PingResult.origin, PingResult.target, \
-        func.substr(PingResult.time,1,prefix_len)).distinct()
+        func.substr(PingResult.time,1,prefix_len),
+        func.min(PingResult.rtt), func.avg(PingResult.rtt), func.max(PingResult.rtt))
+    #.distinct()
     q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
+    q = q.group_by( PingResult.origin, PingResult.target, \
+        func.substr(PingResult.time,1,prefix_len))
     l = []
     for i in q:
-        origin = i[0]
+        origin = i[0]   # może da się ładniej .label?
         target = i[1]
         prefix = i[2]
-        count1 = query_add_args_id(query_add_args_hosts(query_add_args_time( \
-            db.session.query(PingResult.origin)))).\
+        min_rtt = i[3]
+        avg_rtt = i[4]
+        max_rtt = i[5]
+        # usuwam warunek na id - bez sensu do agregowania
+        count1 = query_add_args_hosts(query_add_args_time( \
+            db.session.query(PingResult.origin))).\
             filter(PingResult.time.like(prefix+'%'))
         count_all = count1.count()
         count_success = count1.filter(PingResult.success == True).count()
+        # może po zmianie z distinct na group by w głównym zapytaniu da się zrezygnować z zapytań zagnieżdżonych?
         l.append({'origin':origin, 'target':target, period_name:prefix, \
             'count':count_all, 'count_success':count_success,
+            'avg_rtt': avg_rtt, 'min_rtt': min_rtt, 'max_rtt': max_rtt,
             'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, \
                 target=target, time_prefix=prefix, _external=True)}]})
     return jsonify(l), 200

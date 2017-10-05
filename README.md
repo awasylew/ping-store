@@ -1,6 +1,9 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
+* sortowanie hostów wg hopów
+* min, max, średni rtt (dodane do store, dodać do show i potestować)
+* zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
 * testy jednostkowe ??? ale jak
 * testy z innymi bazami danych (MySQL, PostgreSQL)
 * testy z indeksem na time, inne indeksy?
