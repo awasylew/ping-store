@@ -59,6 +59,7 @@ def sample_results():
             'success':bool(rtt>0), 'rtt':rtt if rtt>0 else None, 'time':time})
     return 'posted!', 200
 
+# lepsza organizacja query_add_args_*: jedne procedura ze wskazaniem, które części uwzględniać bool, z jakimś default?"""
 def query_add_args_id(q):
     """dodanie do zapytania SQLAlchemy warunku na id jeśli występuje w parametrach wywołania HTTP"""
     """test: jest id w parametrach, nie ma id w zapytaniu, querry_add...(), jest id w zapytaniu, dobry warunek, dobra wartość"""
@@ -105,7 +106,7 @@ def query_add_args_window(q):
     return q
 
 @app.route('/pings')
-def pings_get():
+def get_pings():
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
     """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
     """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
@@ -115,6 +116,7 @@ def pings_get():
     """test: ..."""
     # czy to jest ok, że pusty zbiór nie jest błędem? (a w /pings/123 to już błąd)
     q = db.session.query(PingResult)
+    # jakies sortowanie?
     q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
@@ -123,9 +125,10 @@ def pings_get():
     return jsonify(l), 200
 
 @app.route('/pings/<int:id>')
-def pings_get_id(id):
+def get_pings_id(id):
     """zwrócenie pojedynczego wyniku wg id w ścieżce"""
-    """test: ..."""
+    """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
+    """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
     q = db.session.query(PingResult).filter(PingResult.id==id)
     r = q.first()
     if r is None:
@@ -133,136 +136,143 @@ def pings_get_id(id):
     return jsonify(r.to_dict()), 200
 
 def pings_post_generic(args):
-    # args powinno być neutralnym słownikiem, a nie dopasowage do request!
+    """wstawienie pojedynczego pinga do bazy danych"""
+    """test: pusta baza, wstawienie, w bazie dokładnie ten jeden"""
+    """test: dwukrotne wstawione z tym samym id -> błąd"""
+    """test: pusta baza, wstawienie, ponowne wstawienie (dokładnie taki sam czy zmieniony?), w bazie dokładnie jeden"""
+    """test: różne wersje niepoprawnych argumentów z listy przykładowych"""
+    # args powinno być neutralnym słownikiem, a nie dopasowane do request!
+    # a może nie słownik, tylko zwykłe parametry wywołania?
+    # dodać testy na sprawdzenia parametrów
+    # jak już jeden, to nazwa generic średnia
 
     id = args.get('id')
 	# dozwolony tutaj?
 	# kontrole
-	# błąd przy podaniu istniejącego
+	# błąd przy podaniu istniejącego?
+
     time = args.get('time')
     # kontrola czy jest
     # kontrola czy poprawny
     # kontrola czy nie odrzucić z powodu starości
+
     origin = args.get('origin')
     # kontrole ...
+
     target = args.get('target')
     # kontrole ...
-    success = args.get('success')
-#    success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
-#    print(success)
-    # kontrole ...
-    rtt = args.get('rtt')
 
-    p = PingResult(id=id, time=time, origin=origin, target=target, success=success, rtt=rtt)
+    success = args.get('success')
+    # kontrole ...
+
+    rtt = args.get('rtt')
+    # kontrole
+
+    p = PingResult(id=id, time=time, origin=origin, target=target, \
+        success=success, rtt=rtt)
     db.session.add(p)
     db.session.commit()
+    # czy nie powinno być zabezpieczenia przed podwójnym wstawieniem tego samego?
+    # np. wg klucza na origin+target+time?
+    # cel: idempotentność przy ponowieniu wstawiania
 
-    # resp = app.make_response(jsonify(p.to_dict()))
-
+    # wydzielić fragment ustalający scheme albo Location do oddzielnej procedury
+    # i wtedy własne testy jednostkowe
     scheme = request.headers.get('X-Forwarded-Proto')       # metoda specyficzna na heroku, czy będzie dobrze działać w innych układach?
     if scheme is None:
         scheme = request.scheme
 
-#    headers = {}
-#    headers['Location'] = url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)
-#    headers['Content-Type'] = 'application/json'      # niepotrzebne, bo jsonify już ustawia Content-Type
-
     return app.make_response((jsonify(p.to_dict()), 201, \
-        {'Location':  url_for('pings_get_id', id=p.id, _scheme=scheme, _external=True)}))
+        {'Location':  url_for('get_pings_id', id=p.id, _scheme=scheme, _external=True)}))
 
 @app.route('/pings', methods=['POST'])
 def pings_post():
-    return pings_post_generic( request.json )
-
-@app.route('/pings-post')    # do testów
-def pings_post_pseudo():
-#    args = {dict(request.args)}
-    args = {k:request.args.get(k) for k in request.args}
-#    print(args)
-    succ_arg = args.get('success')
-    success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
-    args['success'] = success
-    return pings_post_generic( args )
+    """wstawienie pojedynczego pinga metodą POST"""
+    """test: sprawdzenie, że parametry dobrze przechodzą przez treść POSTa???"""
+    return pings_post_generic(request.json)
 
 @app.route('/pings', methods=['DELETE'])
-@app.route('/pings-delete') # do testów
 def pings_delete():
+    """usuwanie wpisów wg zadanych kryteriów"""
+    """test: przykładowa baza, kilka ręcznie przygotowanych warunków, sprawdzanie liczności wyniku po usunięciu"""
+    """test: j.w. tylko z warunkami"""
     q = db.session.query(PingResult)
-#    query_add_args(q).delete(synchronize_session=False)
     q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
-#    q = query_add_args_window(q)
     q.delete(synchronize_session=False)
     db.session.commit()
     return 'deleted!', 204
 
 @app.route('/origins')
 def get_origins():
+    """listuje wszystkie origins do wyboru"""
+    """test: pusta baza, kilka wstawień, sprawdzenie wyniku na zgodność"""
+    """test: j.w. tylko z warunkami"""
     q = db.session.query(PingResult.origin).distinct()
-    q = query_add_args_id(q)
+    # jakieś sortowanie?
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
-#    q = query_add_args_window(q)
-#    l = [i[0] for i in q]
-#    return jsonify(l), 200
+    q = query_add_args_window(q)
     l = []
     for i in q:
-        origin = i[0]
-        links = []
-#        links.append({'rel':'pings', 'href':url_for('pings_get', target=origin, _external=True)})
-#        links.append({'rel':'minutes', 'href':url_for('get_minutes', target=origin, _external=True)})
-#        links.append({'rel':'hours', 'href':url_for('get_hours', target=origin, _external=True)})
-        links.append({'rel':'targets', 'href':url_for('get_targets', origin=origin,_external=True)})
+        origin = i[0]     # i.origin?
+        links = [{'rel':'targets', 'href':url_for('get_targets', origin=origin, _external=True)}]
+            # url_for nie potrzebuje zabazy w scheme?
         l.append({'origin':origin, 'links':links})
     return jsonify(l), 200
 
-@app.route('/targets')
+@app.route('/targets')      # zmienić nazwę, bo jednak inna funkcja? routes? paths?
 def get_targets():
+    """listuje możliwe przejścia od origin do target"""
+    """test: pusta baza, kilka wstawień, sprawdzenie wyniku na zgodność"""
+    """test: j.w. tylko z warunkami"""
     q = db.session.query(PingResult.origin, PingResult.target).distinct() # tak na sztywno czy wg argumentów?
-    q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
-#    q = query_add_args_window(q)
+    q = query_add_args_window(q)
     l = []
     for i in q:
-        origin = i[0]
-        target = i[1]
+        origin = i[0]       # i.origin?
+        target = i[1]       # i.target?
         links = []
-        links.append({'rel':'pings', 'href':url_for('pings_get', origin=origin, target=target, _external=True)})
+        links.append({'rel':'pings', 'href':url_for('get_pings', origin=origin, target=target, _external=True)})
         links.append({'rel':'minutes', 'href':url_for('get_minutes', origin=origin, target=target, _external=True)})
         links.append({'rel':'hours', 'href':url_for('get_hours', origin=origin, target=target, _external=True)})
         l.append({'target':target, 'links':links})
     return jsonify(l), 200
-#    return "<br>".join([ str(r) for r in q]), 200
 
 @app.route('/minutes')
 def get_minutes():
+    """..."""
+    """test: ..."""
     return get_periods('minute', 12)
 
 @app.route('/hours')
 def get_hours():
+    """..."""
+    """test: ..."""
     return get_periods('hour', 10)
 
 def get_periods( period_name, prefix_len ):
+    """wyciąga zagregowane wyniki dla wybranego okresu (leksykograficznie)"""
+    """test:..."""
     q = db.session.query(PingResult.origin, PingResult.target, \
         func.substr(PingResult.time,1,prefix_len),
         func.min(PingResult.rtt), func.avg(PingResult.rtt), func.max(PingResult.rtt))
-    #.distinct()
-    q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
     q = q.group_by( PingResult.origin, PingResult.target, \
         func.substr(PingResult.time,1,prefix_len))
+    # czy powinno być offset/limit? czy to ma zastosowanie do GROUP BY?
     l = []
     for i in q:
-        origin = i[0]   # może da się ładniej .label?
+        origin = i[0]   # może da się ładniej .label?   albo i.origin
         target = i[1]
         prefix = i[2]
         min_rtt = i[3]
         avg_rtt = i[4]
         max_rtt = i[5]
-        # usuwam warunek na id - bez sensu do agregowania
         count1 = query_add_args_hosts(query_add_args_time( \
             db.session.query(PingResult.origin))).\
             filter(PingResult.time.like(prefix+'%'))
@@ -270,23 +280,15 @@ def get_periods( period_name, prefix_len ):
         count_success = count1.filter(PingResult.success == True).count()
         # może po zmianie z distinct na group by w głównym zapytaniu da się zrezygnować z zapytań zagnieżdżonych?
         l.append({'origin':origin, 'target':target, period_name:prefix, \
-            'count':count_all, 'count_success':count_success,
-            'avg_rtt': avg_rtt, 'min_rtt': min_rtt, 'max_rtt': max_rtt,
-            'links':[{'rel':'pings', 'href':url_for('pings_get', origin=origin, \
+            'count':count_all, 'count_success':count_success, \
+            'avg_rtt': avg_rtt, 'min_rtt': min_rtt, 'max_rtt': max_rtt, \
+            'links':[{'rel':'pings', 'href':url_for('get_pings', origin=origin, \
                 target=target, time_prefix=prefix, _external=True)}]})
     return jsonify(l), 200
 
-"""
-@app.route('/hours')
-def get_hours():
-    q = db.session.query(func.substr(PingResult.time,1,10)).distinct()
-    l = [i[0] for i in q]
-    return jsonify(l), 200
-"""
-
 @app.route('/')
 def root():
-#    return '<!doctype html><html><body><a target="_blank" href="https://dashboard.heroku.com/apps/ping-store">manage app</a></body></html>'
+    """strona pomocnicza"""
     return render_template('index.html')
 
 if __name__ == '__main__':
