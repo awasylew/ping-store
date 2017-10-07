@@ -14,9 +14,17 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_ECHO'] = True
-db = SQLAlchemy(app)
 
-class PingResult(db.Model):
+from testprep import aw_testing
+if aw_testing:
+    print('testing!')
+    engine = create_engine('sqlite:///:memory:', echo=True)
+    base = declarative_base()
+else:
+    db = SQLAlchemy(app)
+    base = db.Model
+
+class PingResult(base):
     """główna treść bazy danych ping - wynik pojedynczego wywołania"""
 
     __tablename__ = 'ping_results'
