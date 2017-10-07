@@ -1,4 +1,4 @@
-from flask import Flask, request, url_for, jsonify, render_template
+﻿from flask import Flask, request, url_for, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 from sqlalchemy import create_engine
@@ -13,6 +13,7 @@ import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
 from testprep import aw_testing
