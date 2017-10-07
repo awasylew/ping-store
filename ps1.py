@@ -190,6 +190,17 @@ def pings_post():
     """wstawienie pojedynczego pinga metodą POST"""
     """test: sprawdzenie, że parametry dobrze przechodzą przez treść POSTa???"""
     return pings_post_generic(request.json)
+#    return pings_post_generic( request.json )
+
+@app.route('/pings-post')    # do testów, !!! ping-probe umie nma razie tylko GET
+def pings_post_pseudo():
+#    args = {dict(request.args)}
+    args = {k:request.args.get(k) for k in request.args}
+#    print(args)
+    succ_arg = args.get('success')
+    success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
+    args['success'] = success
+    return pings_post_generic(args)
 
 @app.route('/pings', methods=['DELETE'])
 def pings_delete():
