@@ -21,6 +21,13 @@ if aw_testing:
     print('testing!')
     engine = create_engine('sqlite:///:memory:', echo=True)
     base = declarative_base()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    base.metadata.create_all(engine)
+    class Dummy: pass
+    db = Dummy()
+    db.session = session
+    # db.create_all = pass 
 else:
     db = SQLAlchemy(app)
     base = db.Model
@@ -50,6 +57,8 @@ def make_database():
     """zainicjowanie schematu bazy danych (potrzebne szczególnie dla baz ulotnych, typowo w pamięci)"""
     """test: brak bazy, operacja bazodanowa powoduje błąd"""
     """test: brak bazy, make_database(), operacja bazodanowa się udaje"""
+    print(db)
+    print(db.create_all)
     db.create_all()
     return 'db created!', 200
 
