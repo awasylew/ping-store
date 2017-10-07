@@ -1,6 +1,7 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
+* zmienic nazwę pliku na store
 * sortowanie hostów wg hopów
 * min, max, średni rtt (dodane do store, dodać do show i potestować)
 * zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
@@ -14,7 +15,7 @@
 * dodać kody błędów do swaggera i do kodu
 * zmienić start/end na prefix (?, w niektórych kontekstach?)
 * sortowanie do sensownego działania limit i offset, opisać?
-* użycie poprawnych metod HTTP -> testowanie przez swaggerhub
+* użycie poprawnych metod HTTP -> testowanie przez swaggerhub, przestawić ping-probe!
 * odczytywanie agregatów z pingów surowych
 * automatyczna agregacja
 * pamięć sond na wypadek przerwy w połączeniu
