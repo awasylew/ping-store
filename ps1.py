@@ -18,21 +18,12 @@ app.config['SQLALCHEMY_ECHO'] = True
 
 from testprep import aw_testing
 if aw_testing:
-    print('testing!')
-    engine = create_engine('sqlite:///:memory:', echo=True)
-    base = declarative_base()
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    base.metadata.create_all(engine)
-    class Dummy: pass
-    db = Dummy()
-    db.session = session
-    # db.create_all = pass 
+    Base = declarative_base()
 else:
     db = SQLAlchemy(app)
-    base = db.Model
+    Base = db.Model
 
-class PingResult(base):
+class PingResult(Base):
     """główna treść bazy danych ping - wynik pojedynczego wywołania"""
 
     __tablename__ = 'ping_results'
@@ -51,6 +42,19 @@ class PingResult(base):
         return {'id':self.id, 'time':str(self.time), \
             'origin':str(self.origin), 'target':str(self.target), \
             'success':self.success, 'rtt':self.rtt}
+
+if aw_testing:
+    print('testing! 2')
+    engine = create_engine('sqlite:///:memory:', echo=True)
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    class Dummy: pass
+    db = Dummy()
+    db.session = session
+    # db.create_all =
+else:
+    pass
 
 @app.route('/makedb')
 def make_database():
@@ -72,6 +76,7 @@ def sample_results():
         rtt = float(random.randrange(50))/10
         if rtt < 0.2:
             rtt = 0.0
+        # dlaczego tutaj używamy post zamiast session.add?
         pings_post_generic({'origin':'sample-'+random.choice(['a', 'b', 'c']), \
             'target':'sample-'+random.choice(['1', '2', '3']), \
             'success':bool(rtt>0), 'rtt':rtt if rtt>0 else None, 'time':time})
