@@ -16,9 +16,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
+def pseudo_jsonify(x):
+    return x
+
 from testprep import aw_testing
 if aw_testing:
     Base = declarative_base()
+    jsonify = pseudo_jsonify
 else:
     db = SQLAlchemy(app)
     Base = db.Model
