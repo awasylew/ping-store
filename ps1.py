@@ -16,13 +16,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
-def pseudo_jsonify(x):
-    return x
-
 from testprep import aw_testing
 if aw_testing:
     Base = declarative_base()
+    def pseudo_jsonify(x): return x
     jsonify = pseudo_jsonify
+    class Dummy: pass
+    request = Dummy()
 else:
     db = SQLAlchemy(app)
     Base = db.Model
@@ -48,15 +48,12 @@ class PingResult(Base):
             'success':self.success, 'rtt':self.rtt}
 
 if aw_testing:
-    print('testing! 2')
-    engine = create_engine('sqlite:///:memory:', echo=True)
+    engine = create_engine('sqlite:///:memory:', echo=False)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
-    session = Session()
-    class Dummy: pass
+    test_session = Session()
     db = Dummy()
-    db.session = session
-    # db.create_all =
+    db.session = test_session
 else:
     pass
 
@@ -89,8 +86,7 @@ def sample_results():
 # lepsza organizacja query_add_args_*: jedne procedura ze wskazaniem, które części uwzględniać bool, z jakimś default?"""
 def query_add_args_id(q):
     """dodanie do zapytania SQLAlchemy warunku na id jeśli występuje w parametrach wywołania HTTP"""
-    """test: jest id w parametrach, nie ma id w zapytaniu, querry_add...(), jest id w zapytaniu, dobry warunek, dobra wartość"""
-    """test: nie ma id w parametrach, nie ma id zapytaniu, querry_add...(), nie ma id w zapytaniu"""
+    """testy --> get_pings"""
     id = request.args.get('id')
     if id is not None:
         q = q.filter(PingResult.id==id)
@@ -112,7 +108,7 @@ def query_add_args_time(q):
 
 def query_add_args_hosts(q):
     """dodanie do zapytania SQLAlchemy warunków dotyczących hostów jeśli występują w parametrach wywołania HTTP"""
-    """test: ..."""
+    """testy --> get_pings"""
     origin = request.args.get('origin')
     if origin is not None:
         q = q.filter(PingResult.origin==origin)
@@ -123,7 +119,8 @@ def query_add_args_hosts(q):
 
 def query_add_args_window(q):
     """dodanie do zapytania SQLAlchemy warunków ograniczająych liczbę wyników jeśli występują w parametrach wywołania HTTP"""
-    """test: ..."""
+    """testy limit razem z get pings"""
+    """test: offset??? jak to zrobić bez gwarantowanej kolejności?"""
     limit = request.args.get('limit')
     if limit is not None:
         q = q.limit(limit)
@@ -135,8 +132,6 @@ def query_add_args_window(q):
 @app.route('/pings')
 def get_pings():
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
-    """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
-    """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
     """test: przykładowa baza danych, wywołanie z start, odpowiednia licznośc wyniku"""
     """test: przykładowa baza danych, wywołanie z end, odpowiednia liczność wyniku"""
     """test: przykładowa baza danych, wywołanie z prefix, odpowiednia liczność wyniku"""
@@ -154,8 +149,6 @@ def get_pings():
 @app.route('/pings/<int:id>')
 def get_pings_id(id):
     """zwrócenie pojedynczego wyniku wg id w ścieżce"""
-    """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
-    """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
     q = db.session.query(PingResult).filter(PingResult.id==id)
     r = q.first()
     if r is None:
@@ -217,13 +210,10 @@ def pings_post():
     """wstawienie pojedynczego pinga metodą POST"""
     """test: sprawdzenie, że parametry dobrze przechodzą przez treść POSTa???"""
     return pings_post_generic(request.json)
-#    return pings_post_generic( request.json )
 
 @app.route('/pings-post')    # do testów, !!! ping-probe umie nma razie tylko GET
 def pings_post_pseudo():
-#    args = {dict(request.args)}
     args = {k:request.args.get(k) for k in request.args}
-#    print(args)
     succ_arg = args.get('success')
     success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
     args['success'] = success
