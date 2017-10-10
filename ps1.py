@@ -49,6 +49,7 @@ class PingResult(Base):
 
 if aw_testing:
     engine = create_engine('sqlite:///:memory:', echo=False)
+    # engine = create_engine('sqlite:///:memory:', echo=True)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     test_session = Session()
@@ -62,8 +63,6 @@ def make_database():
     """zainicjowanie schematu bazy danych (potrzebne szczególnie dla baz ulotnych, typowo w pamięci)"""
     """test: brak bazy, operacja bazodanowa powoduje błąd"""
     """test: brak bazy, make_database(), operacja bazodanowa się udaje"""
-    print(db)
-    print(db.create_all)
     db.create_all()
     return 'db created!', 200
 
@@ -94,7 +93,7 @@ def query_add_args_id(q):
 
 def query_add_args_time(q):
     """dodanie do zapytania SQLAlchemy warunków czasowych jeśli występują w parametrach wywołania HTTP"""
-    """test: ..."""
+    """testy --> get_pings"""
     start = request.args.get('start')
     if start is not None:
         q = q.filter(PingResult.time>=start)
@@ -119,7 +118,7 @@ def query_add_args_hosts(q):
 
 def query_add_args_window(q):
     """dodanie do zapytania SQLAlchemy warunków ograniczająych liczbę wyników jeśli występują w parametrach wywołania HTTP"""
-    """testy limit razem z get pings"""
+    """testy limit --> get_pings"""
     """test: offset??? jak to zrobić bez gwarantowanej kolejności?"""
     limit = request.args.get('limit')
     if limit is not None:
@@ -132,10 +131,7 @@ def query_add_args_window(q):
 @app.route('/pings')
 def get_pings():
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
-    """test: przykładowa baza danych, wywołanie z start, odpowiednia licznośc wyniku"""
-    """test: przykładowa baza danych, wywołanie z end, odpowiednia liczność wyniku"""
-    """test: przykładowa baza danych, wywołanie z prefix, odpowiednia liczność wyniku"""
-    """test: ..."""
+    """test: dorobic jeszcze offset"""
     # czy to jest ok, że pusty zbiór nie jest błędem? (a w /pings/123 to już błąd)
     q = db.session.query(PingResult)
     # jakies sortowanie?
