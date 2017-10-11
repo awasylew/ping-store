@@ -105,8 +105,6 @@ class make_database_testing(unittest.TestCase):
         r = get_pings()
         self.assertEqual(r, ([], 200))
 
-    #def test__get_pings__no_target(self) == __no_id
-
     def test__get_pings__target_existing(self):
         """test: przykładowa baza danych, wywołanie z target istniejącym, zwrócony wynik wg tagret"""
         self.prep1()

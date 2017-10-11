@@ -209,6 +209,7 @@ def pings_post():
 
 @app.route('/pings-post')    # do testów, !!! ping-probe umie nma razie tylko GET
 def pings_post_pseudo():
+    # zmienić nazwę na pseude_post_pings
     args = {k:request.args.get(k) for k in request.args}
     succ_arg = args.get('success')
     success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
@@ -217,6 +218,7 @@ def pings_post_pseudo():
 
 @app.route('/pings', methods=['DELETE'])
 def pings_delete():
+    # zmienić nazwę na delete_pings
     """usuwanie wpisów wg zadanych kryteriów"""
     """test: przykładowa baza, kilka ręcznie przygotowanych warunków, sprawdzanie liczności wyniku po usunięciu"""
     """test: j.w. tylko z warunkami"""
