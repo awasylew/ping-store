@@ -19,7 +19,7 @@ app.config['SQLALCHEMY_ECHO'] = True
 from testprep import aw_testing
 if aw_testing:
     Base = declarative_base()
-    def pseudo_jsonify(x): return x
+    def pseudo_jsonify(x): return x    # usunąć jeśli już potrzebne
     jsonify = pseudo_jsonify
     class Dummy: pass
     request = Dummy()
@@ -61,6 +61,7 @@ else:
 @app.route('/makedb')
 def make_database():
     """zainicjowanie schematu bazy danych (potrzebne szczególnie dla baz ulotnych, typowo w pamięci)"""
+    """test: na razie bez testowania, bo zbyt pokręcone mockowanie"""
     """test: brak bazy, operacja bazodanowa powoduje błąd"""
     """test: brak bazy, make_database(), operacja bazodanowa się udaje"""
     db.create_all()
@@ -69,8 +70,7 @@ def make_database():
 @app.route('/sample-results')
 def sample_results():
     """wstawienie przykładowych wyników ping (wartości losowe, czas bieżący)"""
-    """test: pusta baza, sample_results(), w bazie 100 wyników"""
-    """test: pusta baza, sample_results(), wstawione wartości ograniczone do dozwolonych zbiorów/zakresów, w tym rtt null wiw brak sukcesu"""
+    """bez testowania, bo to metoda nieprodukcyjna"""
     time=datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     for i in range(100):
         rtt = float(random.randrange(50))/10
@@ -128,19 +128,20 @@ def query_add_args_window(q):
         q = q.offset(offset)
     return q
 
-@app.route('/pings')
 def get_pings():
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
-    """test: dorobic jeszcze offset"""
-    # czy to jest ok, że pusty zbiór nie jest błędem? (a w /pings/123 to już błąd)
+    """test: dorobic jeszcze offset, ale najpierw sortowanie?"""
     q = db.session.query(PingResult)
-    # jakies sortowanie?
     q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
     q = query_add_args_window(q)
-    l = [i.to_dict() for i in q]
-    return jsonify(l), 200
+    # jakies sortowanie?
+    return [i.to_dict() for i in q]
+
+@app.route('/pings')
+def get_pings_view():
+    return jsonify(get_pings()), 200
 
 @app.route('/pings/<int:id>')
 def get_pings_id(id):
@@ -150,6 +151,7 @@ def get_pings_id(id):
     if r is None:
         return 'Not found', 404
     return jsonify(r.to_dict()), 200
+    # a gdyby rozdzielić: r = get_pings_id(); if r is None: ... else: ...
 
 def pings_post_generic(args):
     """wstawienie pojedynczego pinga do bazy danych"""
