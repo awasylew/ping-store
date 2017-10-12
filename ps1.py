@@ -206,7 +206,7 @@ def pings_post_generic(args):
         scheme = request.scheme
 
     return app.make_response((jsonify(p.to_dict()), 201, \
-        {'Location':  url_for('get_pings_id', id=p.id, _scheme=scheme, _external=True)}))
+        {'Location':  url_for('get_pings_id_view', id=p.id, _scheme=scheme, _external=True)}))
 
 @app.route('/pings', methods=['POST'])
 def pings_post():
@@ -269,7 +269,7 @@ def get_targets():
         origin = i[0]       # i.origin?
         target = i[1]       # i.target?
         links = []
-        links.append({'rel':'pings', 'href':url_for('get_pings', origin=origin, target=target, _external=True)})
+        links.append({'rel':'pings', 'href':url_for('get_pings_view', origin=origin, target=target, _external=True)})
         links.append({'rel':'minutes', 'href':url_for('get_minutes', origin=origin, target=target, _external=True)})
         links.append({'rel':'hours', 'href':url_for('get_hours', origin=origin, target=target, _external=True)})
         l.append({'target':target, 'links':links})
@@ -315,7 +315,7 @@ def get_periods( period_name, prefix_len ):
         l.append({'origin':origin, 'target':target, period_name:prefix, \
             'count':count_all, 'count_success':count_success, \
             'avg_rtt': avg_rtt, 'min_rtt': min_rtt, 'max_rtt': max_rtt, \
-            'links':[{'rel':'pings', 'href':url_for('get_pings', origin=origin, \
+            'links':[{'rel':'pings', 'href':url_for('get_pings_view', origin=origin, \
                 target=target, time_prefix=prefix, _external=True)}]})
     return jsonify(l), 200
 
