@@ -128,7 +128,7 @@ def query_add_args_window(q):
         q = q.offset(offset)
     return q
 
-def get_pings():
+def get_pings2():
     # a powinien zwracać obiekty czy już słowniki?
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
     """test: dorobic jeszcze offset, ale najpierw sortowanie?"""
@@ -138,25 +138,28 @@ def get_pings():
     q = query_add_args_hosts(q)
     q = query_add_args_window(q)
     # jakies sortowanie?
-    return [i.to_dict() for i in q]
+    return q.all()
+    # return [i.to_dict() for i in q]
+
+def get_pings():
+    return [i.to_dict() for i in get_pings2()]
 
 @app.route('/pings')
 def get_pings_view():
     return jsonify(get_pings()), 200
 
 def get_pings_id(id):
-    # a powinien zwracać obiekty czy już słowniki?
+    """zwrócenie pojedynczego wyniku wg id"""
     q = db.session.query(PingResult).filter(PingResult.id==id)
     return q.first()
 
 @app.route('/pings/<int:id>')
 def get_pings_id_view(id):
-    """zwrócenie pojedynczego wyniku wg id w ścieżce"""
+    """pojedynczy wyniku wg id w ścieżce"""
     r = get_pings_id(id)
     if r is None:
         return 'Not found', 404
     return jsonify(r.to_dict()), 200
-    # a gdyby rozdzielić: r = get_pings_id(); if r is None: ... else: ...
 
 def pings_post_generic(args):
     """wstawienie pojedynczego pinga do bazy danych"""
