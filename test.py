@@ -28,17 +28,15 @@ class make_database_testing(unittest.TestCase):
     def test__get_pings_id__get_existing(self):
         """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
         self.prep1()
-        (r1, code1) = get_pings_id(101)
-        (r2, code2) = get_pings_id(102)
-        self.assertEqual(200, code1)
-        self.assertEqual(self.p1d, r1)
-        self.assertEqual(200, code2)
-        self.assertEqual(self.p2d, r2)
+        r1 = get_pings_id(101)
+        r2 = get_pings_id(102)
+        self.assertEqual(r1, self.p1d)
+        self.assertEqual(r2, self.p2d)
 
     def test__get_pings_id__get_nonexistent(self):
         """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
         self.prep1()
-        (r, code) = get_pings_id(103)
+        (r, code) = get_pings_id_view(103)
         self.assertEqual(code, 404)
         self.assertEqual('Not found', r)
 

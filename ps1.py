@@ -129,6 +129,7 @@ def query_add_args_window(q):
     return q
 
 def get_pings():
+    # a powinien zwracać obiekty czy już słowniki?
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
     """test: dorobic jeszcze offset, ale najpierw sortowanie?"""
     q = db.session.query(PingResult)
@@ -143,11 +144,15 @@ def get_pings():
 def get_pings_view():
     return jsonify(get_pings()), 200
 
-@app.route('/pings/<int:id>')
 def get_pings_id(id):
-    """zwrócenie pojedynczego wyniku wg id w ścieżce"""
+    # a powinien zwracać obiekty czy już słowniki?
     q = db.session.query(PingResult).filter(PingResult.id==id)
-    r = q.first()
+    return q.first()
+
+@app.route('/pings/<int:id>')
+def get_pings_id_view(id):
+    """zwrócenie pojedynczego wyniku wg id w ścieżce"""
+    r = get_pings_id(id)
     if r is None:
         return 'Not found', 404
     return jsonify(r.to_dict()), 200
