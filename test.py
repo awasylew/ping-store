@@ -144,6 +144,15 @@ class make_database_testing(unittest.TestCase):
         self.assertEqual(r, 'deleted!')
         self.assertEqual(test_session.query(PingResult).count(), 0)
 
+    def test__add_ping__1(self):
+        """test: pusta baza, wstawienie nowego, select wykazuje obecność nowego i tylko jego"""
+        time = datetime.datetime.now().strftime('%Y%m%d%H')
+        p = PingResult(id=201, time=time+'0101', origin='o-201', \
+            target='t-201', success=True, rtt=201)
+        add_ping(p)
+        p1 = test_session.query(PingResult).one()
+        self.assertEqual(p1, p)
+
     def test__pings_delete__id_existing(self):
         """test: kasowanie wg id istniejącego"""
         self.prep1()

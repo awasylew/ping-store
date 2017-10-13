@@ -211,7 +211,7 @@ def pings_post_generic(args):
     return app.make_response((jsonify(p.to_dict()), 201, \
         {'Location':  url_for('get_pings_id_view', id=p.id, _scheme=scheme, _external=True)}))
 
-@app.route('/pings', methods=['POST'])
+@app.route('/pings-old', methods=['POST'])
 def pings_post():
     """wstawienie pojedynczego pinga metodą POST"""
     """test: sprawdzenie, że parametry dobrze przechodzą przez treść POSTa???"""
@@ -225,6 +225,24 @@ def pings_post_pseudo():
     success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
     args['success'] = success
     return pings_post_generic(args)
+
+def add_ping(p):
+    """wstawianie nowego obiektu PingResult do bazy"""
+    # bez commit - zrobić w view
+    # kiedy walidacja wartości w polach?
+    # kiedy walidacja JSON?
+    db.session.add(p)
+
+@app.route('/pings', methods=['POST'])
+def ping_post_view():
+    j = request.get_json() # będzie źle jeśli nie w formacie JSON
+    # co z id? a jak nie będzie?
+    p = PingResult( \
+        id=j['id'], time=j['time'], origin=j['origin'], \
+        target=j['target'], success=j['success'], rtt=j['rtt'])
+    add_ping(p)
+    db.session.commit()
+    return 'posted! '+str(j) + str(p)
 
 @app.route('/pings', methods=['DELETE'])
 def pings_delete():
