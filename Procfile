@@ -1,1 +1,1 @@
-web: python ps1.py
+web: python store.py

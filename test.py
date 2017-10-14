@@ -1,9 +1,9 @@
-import ps1
+import store
 import unittest
 import datetime
 import copy
 
-from ps1 import *
+from store import *
 
 class make_database_testing(unittest.TestCase):
 
