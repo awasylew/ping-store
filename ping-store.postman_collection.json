@@ -1,0 +1,355 @@
+{
+	"variables": [],
+	"info": {
+		"name": "ping-store",
+		"_postman_id": "17b5b424-51e7-9f90-1a3d-e929cb67aac9",
+		"description": "API do magazynu ping-store.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "pings",
+			"description": "Folder for pings",
+			"item": [
+				{
+					"name": "Pobiera wyniki ping",
+					"request": {
+						"url": "http://ping-store.herokuapp.com/pings?limit={{limit}}&offset={{offset}}&origin={{origin}}&target={{target}}&start={{start}}&end={{end}}",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": "Zwraca tablicę wyników opcjonalnie spełniających podane kryteria. A może zamiast start/end zrobić"
+					},
+					"response": []
+				},
+				{
+					"name": "Wstawianie wyników ping.",
+					"request": {
+						"url": "http://ping-store.herokuapp.com/pings",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "Obiekt wyniku ping do wstawienia."
+						},
+						"description": "Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz. **TODO: kontrola parametrów, błędy**"
+					},
+					"response": []
+				},
+				{
+					"name": "Wstawianie wyników ping [localhost:5000]",
+					"request": {
+						"url": "http://localhost:5000/pings",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"367\",\r\n  \"time\": \"20170907094734\",\r\n  \"origin\": \"A8\",\r\n  \"target\": \"onet.pl\",\r\n  \"success\": true,\r\n  \"rtt\": \"37\"\r\n}\r\n"
+						},
+						"description": "Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz. **TODO: kontrola parametrów, błędy**"
+					},
+					"response": []
+				},
+				{
+					"name": "Kasuje wyniki ping",
+					"request": {
+						"url": "http://ping-store.herokuapp.com/pings?limit={{limit}}&offset={{offset}}&origin={{origin}}&target={{target}}&start={{start}}&end={{end}}",
+						"method": "DELETE",
+						"header": [],
+						"body": {},
+						"description": "Kasuje wyniki (opcjonalnie - tylko spełniające podane kryteria)."
+					},
+					"response": []
+				},
+				{
+					"name": "Pobiera pojedynczy wynik ping.",
+					"request": {
+						"url": {
+							"raw": "http://ping-store.herokuapp.com/pings/:ping-id",
+							"protocol": "http",
+							"host": [
+								"ping-store",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"pings",
+								":ping-id"
+							],
+							"query": [],
+							"variable": [
+								{
+									"value": "{{ping-id}}",
+									"id": "ping-id"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json, text/html",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "minutes",
+			"description": "Folder for minutes",
+			"item": [
+				{
+					"name": "Pobieranie dostępnych minut",
+					"request": {
+						"url": "http://ping-store.herokuapp.com/minutes",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": "Sensowne warunki limit, offset, start, end, origin, targt"
+					},
+					"response": []
+				},
+				{
+					"name": "Agregacja wyników ping w minuty",
+					"request": {
+						"url": {
+							"raw": "http://ping-store.herokuapp.com/minutes/:minute",
+							"protocol": "http",
+							"host": [
+								"ping-store",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"minutes",
+								":minute"
+							],
+							"query": [],
+							"variable": [
+								{
+									"value": "{{minute}}",
+									"id": "minute"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": "Można mieć wiele agregatów za ten sam okres? Można agregować agregaty? A może agreagowanie nie powinno być zlecane tylko dziać się automatycznie? Agregaty można robić też z dancyh surowych na bieżąco np. za pomocą widoków - zajmują więcej miejsca. A może widoki połączą dane surowe i zagregowane (może wymagać transakcyjnej agregacji). Możliwe agregaty: minuta, godzina, doba ping-store/days&date=  -> JSON { start:, end:, expected:(liczba próbek), actual:(liczba próbek), avg... } ping-store/days  - lista dni -> { 2017-08-20, 2018-08-21, ... } \"20170820\" ping-store/days?date=20170824 albo start=20170824&end=20170825 (wymaga tworów typu +1 różnych poziomach}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "hours",
+			"description": "Folder for hours",
+			"item": [
+				{
+					"name": "Agregacja wyników ping w godziny",
+					"request": {
+						"url": {
+							"raw": "http://ping-store.herokuapp.com/hours/:hour",
+							"protocol": "http",
+							"host": [
+								"ping-store",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"hours",
+								":hour"
+							],
+							"query": [],
+							"variable": [
+								{
+									"value": "{{hour}}",
+									"id": "hour"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "days",
+			"description": "Folder for days",
+			"item": [
+				{
+					"name": "Agregacja wyników ping w dni",
+					"request": {
+						"url": {
+							"raw": "http://ping-store.herokuapp.com/days/:day",
+							"protocol": "http",
+							"host": [
+								"ping-store",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"days",
+								":day"
+							],
+							"query": [],
+							"variable": [
+								{
+									"value": "{{day}}",
+									"id": "day"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "origins",
+			"description": "Folder for origins",
+			"item": [
+				{
+					"name": "Wszystkie źródła w wynikach ping",
+					"request": {
+						"url": "http://ping-store.herokuapp.com/origins",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": "Może dodać jeszcze opcjonalne parametry takie jak w GET /pings?"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "targets",
+			"description": "Folder for targets",
+			"item": [
+				{
+					"name": "Wszystkie cele w wynikach ping",
+					"request": {
+						"url": "http://ping-store.herokuapp.com/targets",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": "Może dodać jeszcze opcjonalne parametry takie jak w GET /pings?"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pobiera pojedynczy wynik ping. id=367",
+			"request": {
+				"url": {
+					"raw": "http://ping-store.herokuapp.com/pings/:ping-id",
+					"protocol": "http",
+					"host": [
+						"ping-store",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"pings",
+						":ping-id"
+					],
+					"query": [],
+					"variable": [
+						{
+							"description": "",
+							"key": "ping-id",
+							"value": "367"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json, text/html",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
