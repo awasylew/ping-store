@@ -12,8 +12,8 @@ import datetime
 import os
 
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://pingstore:pingstore@localhost/pingstore1'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://pingstore:pingstore@localhost/pingstore1'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 
