@@ -123,6 +123,7 @@ def query_add_args_window(q):
     """dodanie do zapytania SQLAlchemy warunków ograniczająych liczbę wyników jeśli występują w parametrach wywołania HTTP"""
     """testy limit --> get_pings"""
     """test: offset??? jak to zrobić bez gwarantowanej kolejności?"""
+    # jakiś default na limit?
     limit = request.args.get('limit')
     if limit is not None:
         q = q.limit(limit)
@@ -148,18 +149,14 @@ def get_pings():
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
     """test: dorobic jeszcze offset, ale najpierw sortowanie?"""
     q = db.session.query(PingResult)
-    """q = query_add_args_id(q)
-    q = query_add_args_time(q)
-    q = query_add_args_hosts(q)
-    q = query_add_args_window(q)"""
     q = query_add(q, id=True, time=True, hosts=True, window=True)
     # jakies sortowanie?
     return q.all()
 
 @app.route('/pings')
 def get_pings_view():
-    pg = [i.to_dict() for i in get_pings()]
-    return jsonify(pg), 200
+    pd = [i.to_dict() for i in get_pings()]
+    return jsonify(pd), 200
 
 def get_pings_id(id):
     """zwrócenie pojedynczego wyniku wg id"""

@@ -13,10 +13,29 @@ tags:
   description: Słowniki do zapytań (stworzone automatycznie z wyników ping)
 schemes:
 - http
-# host: localhost:5000
-host: ping-store.herokuapp.com
+host: localhost:5000
+# host: ping-store.herokuapp.com
 paths:
   /pings:
+    get:
+      tags:
+      - pings
+      summary: Pobiera wyniki ping
+      description: Zwraca listę wyników opcjonalnie spełniających podane kryteria (jeśli podane). 
+      parameters:
+      - $ref: '#/parameters/id' 
+      - $ref: '#/parameters/start' 
+      - $ref: '#/parameters/end' 
+      - $ref: '#/parameters/time_prefix' 
+      - $ref: '#/parameters/origin' 
+      - $ref: '#/parameters/target' 
+      - $ref: '#/parameters/limit' 
+      - $ref: '#/parameters/offset' 
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/PingResultList'
     post:
       tags:
       - pings
@@ -38,49 +57,6 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/PingResult'
-    get:
-      tags:
-      - pings
-      summary: Pobiera wyniki ping
-      description: Zwraca tablicę wyników opcjonalnie spełniających podane kryteria. A może zamiast start/end zrobić 
-      parameters:
-      - in: query
-        name: limit
-        description: Maksymalna liczba wyników do pobrania (domyślnie 10???)
-        required: false
-        type: integer
-      - in: query
-        name: offset
-        description: Liczba pierwszych wyników do pominięcia (domyślnie 0)
-        required: false
-        type: integer
-      - in: query
-        name: origin
-        description: Pobieraj tylko wyniki dla podanego źródła
-        required: false
-        type: string
-      - in: query
-        name: target
-        description: Pobieraj tylko wyniki dla podanego celu
-        required: false
-        type: string
-      - in: query
-        name: start
-        description: Pobieraj tylko wyniki z podanego czasu późniejsze (porządek leksykograficzny)
-        required: false
-        type: string
-      - in: query
-        name: end
-        description: Pobieraj tylko wyniki wcześniejsze od podanego czasu (porządek leksykograficzny)
-        required: false
-        type: string
-      responses:
-        200:
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/PingResult'
     delete:
       tags:
       - pings
@@ -97,16 +73,8 @@ paths:
         description: Liczba pierwszych wyników do pominięcia (domyślnie 0)
         required: false
         type: integer
-      - in: query
-        name: origin
-        description: Kasuj tylko wyniki dla podanego źródła
-        required: false
-        type: integer
-      - in: query
-        name: target
-        description: Kasuj tylko wyniki dla podanego celu
-        required: false
-        type: integer
+      - $ref: '#/parameters/origin' 
+      - $ref: '#/parameters/target' 
       - in: query
         name: start
         description: Kasuj tylko wyniki z podanego czasu późniejsze (porządek leksykograficzny)
@@ -118,7 +86,7 @@ paths:
         required: false
         type: string
       responses:
-        200:
+        204:
           description: Deleted
   /pings/{ping-id}:
     get:
@@ -249,31 +217,32 @@ definitions:
     properties:
       id:
         type: integer
-        description: unikalne, nadawane przez magazyn, nie podawać przy wstawianiu
-        example: '367'
+        description: unikalne, nadawane przez magazyn, najlepiej nie podawać przy wstawianiu
+        example: 367
       time:
         type: string
-        description: czas wykonania testu w formacie tekstowym YYYYMMDDHHMMSS - porządek leksykograficzny pozwala porównywać tekstowo z prefiksami oznaczającymi grubsze jednostki czasu
+        description: moment wykonania testu w formacie tekstowym YYYYMMDDHHMMSS - porządek leksykograficzny pozwala porównywać tekstowo z prefiksami oznaczającymi grubsze jednostki czasu
         example: '20170907094734'
       origin:
         type: string 
-        description: określenie miejsca, z którego ping był wykonany
+        description: miejsce, z którego ping był wykonany
         example: 'A8'
       target:
         type: string 
-        description: bo można badać wiele różnych hostów
+        description: host sprawdzany pingiem
         example: 'onet.pl'
       success:
         type: boolean 
-        description: 0/1 w zależności od tego czy ping doszedł do skutku, w zadanym czasie granicznym) a może jednak zmienić w true/false ew. mapowane na 0/1 w bazie danych?
+        description: czy ping doszedł do skutku (w zadanym czasie granicznym)
         example: true
-        # enum:
-        # - 0
-        # - 1
       rtt:
         type: integer 
-        description: liczba milisekund RTT, None/null? jeśli ping nie był skuteczy
-        example: '37'
+        description: liczba sekund RTT, null jeśli ping nie był skuteczy (success=false)
+        example: 24.56
+  PingResultList:
+    type: array
+    items: 
+      $ref: '#/definitions/PingResult'
   PingAggregate:
     type: object
     required:
@@ -308,3 +277,52 @@ definitions:
         type: number
         description: Średni czas rtt w danym okresie
         example: 23.54
+parameters:
+  id:
+    in: query
+    name: id
+    type: string
+    description: Pobieraj/kasuj tylko wynik o danym id
+    required: false
+  start:
+    in: query
+    name: start
+    description: Pobieraj tylko wyniki z podanego czasu późniejsze
+    required: false
+    type: string
+  end:
+    in: query
+    name: end
+    description: Pobieraj tylko wyniki wcześniejsze od podanego czasu
+    required: false
+    type: string
+  time_prefix:
+    in: query
+    name: time_prefix
+    description: Pobieraj tylko wyniki w podanym przedzial czasu (przedział zdefiniony jako prefiks, porządek leksykograficzny)
+    required: false
+    type: string
+  origin:
+    in: query
+    name: origin
+    type: string
+    description: Pobieraj/kasuj tylko wyniki dla wskazanego źródła
+    required: false
+  target:
+    in: query
+    name: target
+    type: string
+    description: Pobieraj/kasuj tylko wyniki dla wskazanego celu
+    required: false
+  limit:
+    in: query
+    name: limit
+    description: Maksymalna liczba zwracanych wyników
+    required: false
+    type: integer
+  offset:
+    in: query
+    name: offset
+    description: Liczba pierwszych wyników do pominięcia
+    required: false
+    type: integer
