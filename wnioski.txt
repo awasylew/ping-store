@@ -1,0 +1,20 @@
+próby uruchomienia MySQL dla SQLAlchemy
+
+pip install mysql-python
+--> wymaga kompilatora C++
+
+pip install mysql-connector
+--> też wymaga C++
+
+pip install oursql
+--> nie działa w 3.x
+
+pip install mysqlclient
+--> zainstalowało się
+--> jest warning w czasie uruchamiania skryptu, a nie da się wstawić pola z polskim znakiem
+--> chyba to niepotrzebne stworzenie bazy UTF-8 nie rozwiązało problemu (CREATE DATABASE sqlalch1
+    ->   DEFAULT CHARACTER SET utf8
+    ->   DEFAULT COLLATE utf8_general_ci;)
+--> rozbudowa URL pomaga na commit: create_engine('mysql://root2:XXX@localhost/sqlalch1?charset=utf8')
+   --> zostaje ostrzeżenie i nie mogę się go pozbyć
+   --> okazuje się, że to problem ze zmienną MySQL system_time_zone, jest na to głoszony błąd MySQL w 2014r ale nie ma jeszcze rozwiązania :(

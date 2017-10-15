@@ -12,7 +12,8 @@ import datetime
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://pingstore:pingstore@localhost/pingstore1'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 
@@ -33,9 +34,9 @@ class PingResult(Base):
     __tablename__ = 'ping_results'
 
     id = Column(Integer, primary_key=True)
-    time = Column(String)                   #YYYYmmddHHMMSS
-    origin = Column(String)
-    target = Column(String)
+    time = Column(String(14))                   #YYYYmmddHHMMSS  # co jeśli dłuższe? dodać badanie długości?
+    origin = Column(String(20))             # j.w.
+    target = Column(String(20))             # j.w.
     success = Column(Boolean)
     rtt = Column(Float)
 

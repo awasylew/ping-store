@@ -1,27 +1,25 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
-* zmienic nazwę pliku na store
 * sortowanie hostów wg hopów
-* min, max, średni rtt (dodane do store, dodać do show i potestować)
 * zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
-* testy jednostkowe ??? ale jak
+* testy jednostkowe - dalej
+* testy end-end
 * testy z innymi bazami danych (MySQL, PostgreSQL)
 * testy z indeksem na time, inne indeksy?
 * wyniki jako JSON albo XML na podstawie Accept? przynajmniej w niektórych miejscach?
 * środowisko: tworzenie venv skryptem
+* środowisko: tworzenie produkcji, testów, konfiguracje maszyn ze sobą
 * środowisko: ścisłe wersje w pip, kontrolowany proces upgrade
 * komponenty?: testowanie przynajmniej okresowo (do automatów: zawsze?) również z MySQL (szczególnie: func.substr)
 * dodać kody błędów do swaggera i do kodu
-* zmienić start/end na prefix (?, w niektórych kontekstach?)
 * sortowanie do sensownego działania limit i offset, opisać?
-* użycie poprawnych metod HTTP -> testowanie przez swaggerhub, przestawić ping-probe!
+* użycie poprawnych metod HTTP -> testowanie przez swaggerhub
 * odczytywanie agregatów z pingów surowych
 * automatyczna agregacja
 * pamięć sond na wypadek przerwy w połączeniu
-* doczytać i potestować  (dziwne: udały się konkurencyjne zmiany)
-zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
-* POST pings dodać sprawdzenie parametrów
+* doczytać i potestować  (dziwne: udały się konkurencyjne zmiany) zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
+* POST pings dodać sprawdzenie parametrów (nie mogą być puste, bo potem trafiają na ścieżki; muszą być bezpiecznymi ścieżkami, automatyczne ubezpiecznianie?)
 
 ## Opis komponentu
 
