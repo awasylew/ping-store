@@ -1,4 +1,3 @@
-set FLASK_APP=store.py
+set PORT=5000
 set FLASK_DEBUG=1
-rem python -m flask
-flask run
+python store.py
