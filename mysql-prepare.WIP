@@ -1,7 +1,9 @@
 create database pingstore1;
+create database pingstoretest;
 
 create user pingstore identified by 'xxx';
 create user pingstore@localhost identified by 'xxx';
 
 grant all privileges on pingstore1.* to pingstore@localhost;
+grant all privileges on pingstoretest.* to pingstore@localhost;
 # można jakoś zmniejszyć uprawnienia? można oddzielić zapis?

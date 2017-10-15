@@ -14,6 +14,7 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://pingstore:pingstore@localhost/pingstore1'
+#uwaga hasło w kodzie, pobrać ze środowska
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 
@@ -51,6 +52,8 @@ class PingResult(Base):
 if aw_testing:
     engine = create_engine('sqlite:///:memory:', echo=False)
     # engine = create_engine('sqlite:///:memory:', echo=True)
+    engine = create_engine('mysql://pingstore:pingstore@localhost/pingstoretest', echo=False)
+    # uwaga hasło w kodzie; pobierać ze środowiska
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     test_session = Session()
