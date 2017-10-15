@@ -51,8 +51,7 @@ class PingResult(Base):
 
 if aw_testing:
     engine = create_engine('sqlite:///:memory:', echo=False)
-    # engine = create_engine('sqlite:///:memory:', echo=True)
-    engine = create_engine('mysql://pingstore:pingstore@localhost/pingstoretest', echo=False)
+    # engine = create_engine('mysql://pingstore:pingstore@localhost/pingstoretest', echo=False)
     # uwaga hasło w kodzie; pobierać ze środowiska
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -132,25 +131,35 @@ def query_add_args_window(q):
         q = q.offset(offset)
     return q
 
-def get_pings2():
+def query_add(q, id=False, time=False, hosts=False, window=False):
+    """uniwersalna metoda dodająca poszczególne rodzaje testów"""
+    if id:
+        q = query_add_args_id(q)
+    if time:
+        q = query_add_args_time(q)
+    if hosts:
+        q = query_add_args_hosts(q)
+    if window:
+        q = query_add_args_window(q)
+    return q
+
+def get_pings():
     # a powinien zwracać obiekty czy już słowniki?
     """zwrócenie listy wyników ping ograniczonych parametrami wywołania HTTP"""
     """test: dorobic jeszcze offset, ale najpierw sortowanie?"""
     q = db.session.query(PingResult)
-    q = query_add_args_id(q)
+    """q = query_add_args_id(q)
     q = query_add_args_time(q)
     q = query_add_args_hosts(q)
-    q = query_add_args_window(q)
+    q = query_add_args_window(q)"""
+    q = query_add(q, id=True, time=True, hosts=True, window=True)
     # jakies sortowanie?
     return q.all()
-    # return [i.to_dict() for i in q]
-
-def get_pings():
-    return [i.to_dict() for i in get_pings2()]
 
 @app.route('/pings')
 def get_pings_view():
-    return jsonify(get_pings()), 200
+    pg = [i.to_dict() for i in get_pings()]
+    return jsonify(pg), 200
 
 def get_pings_id(id):
     """zwrócenie pojedynczego wyniku wg id"""
@@ -254,9 +263,10 @@ def pings_delete():
     """test: przykładowa baza, kilka ręcznie przygotowanych warunków, sprawdzanie liczności wyniku po usunięciu"""
     """test: j.w. tylko z warunkami"""
     q = db.session.query(PingResult)
-    q = query_add_args_id(q)
+    """q = query_add_args_id(q)
     q = query_add_args_time(q)
-    q = query_add_args_hosts(q)
+    q = query_add_args_hosts(q)"""
+    q = query_add(q, id=True, time=True, hosts=True)
     q.delete(synchronize_session=False)
     db.session.commit()
     return 'deleted!', 204
@@ -268,9 +278,10 @@ def get_origins():
     """test: j.w. tylko z warunkami"""
     q = db.session.query(PingResult.origin).distinct()
     # jakieś sortowanie?
-    q = query_add_args_time(q)
+    """q = query_add_args_time(q)
     q = query_add_args_hosts(q)
-    q = query_add_args_window(q)
+    q = query_add_args_window(q)"""
+    q = query_add(q, time=True, hosts=True, window=True)
     l = []
     for i in q:
         origin = i[0]     # i.origin?
@@ -285,9 +296,10 @@ def get_targets():
     """test: pusta baza, kilka wstawień, sprawdzenie wyniku na zgodność"""
     """test: j.w. tylko z warunkami"""
     q = db.session.query(PingResult.origin, PingResult.target).distinct() # tak na sztywno czy wg argumentów?
-    q = query_add_args_time(q)
+    """q = query_add_args_time(q)
     q = query_add_args_hosts(q)
-    q = query_add_args_window(q)
+    q = query_add_args_window(q)"""
+    q = query_add(q, time=True, hosts=True, window=True)
     l = []
     for i in q:
         origin = i[0]       # i.origin?
@@ -317,8 +329,9 @@ def get_periods( period_name, prefix_len ):
     q = db.session.query(PingResult.origin, PingResult.target, \
         func.substr(PingResult.time,1,prefix_len),
         func.min(PingResult.rtt), func.avg(PingResult.rtt), func.max(PingResult.rtt))
-    q = query_add_args_time(q)
-    q = query_add_args_hosts(q)
+    """q = query_add_args_time(q)
+    q = query_add_args_hosts(q)"""
+    q = query_add(q, time=True, hosts=True)
     q = q.group_by( PingResult.origin, PingResult.target, \
         func.substr(PingResult.time,1,prefix_len))
     # czy powinno być offset/limit? czy to ma zastosowanie do GROUP BY?

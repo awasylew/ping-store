@@ -1,6 +1,7 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
+* parametry ze środowiska, może da się wtedy uładnić kod warunkujący testy?
 * sortowanie hostów wg hopów
 * zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
 * testy jednostkowe - dalej

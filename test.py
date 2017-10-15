@@ -43,28 +43,28 @@ class make_database_testing(unittest.TestCase):
         """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
         self.prep1()
         request.args = {'id': 101}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [self.p1])
 
     def test__get_pings__id_existing2(self):
         """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
         self.prep1()
         request.args = {'id': 101}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [self.p1])
 
     def test__get_pings__id_nonexistent(self):
         """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
         self.prep1()
         request.args = {'id': 103}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [])
 
     def test__get_pings__no_id(self):
         """test: przykładowa baza danych, wywołanie bez id, zwrócony wynik pełny"""
         self.prep1()
         request.args = {}
-        r = get_pings2()
+        r = get_pings()
         self.assertIn(self.p1, r)
         self.assertIn(self.p2, r)
 
@@ -72,55 +72,55 @@ class make_database_testing(unittest.TestCase):
         """test: sprawdzenie stosowania warunku start"""
         self.prep1()
         request.args = {'start': self.time+'02'}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [self.p2])
 
     def test__git_pings__end(self):
         """test: sprawdzenie stosowania warunku end"""
         self.prep1()
         request.args = {'end': self.time+'02'}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [self.p1])
 
     def test__git_pings__time_prefix(self):
         """test: sprawdzenie stosowania warunku time_prefix"""
         self.prep1()
         request.args = {'time_prefix': self.time+'02'}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [self.p2])
 
     def test__get_pings__origin_existing(self):
         """test: przykładowa baza danych, wywołanie z origin istniejącym, zwrócony wynik wg origin"""
         self.prep1()
         request.args = {'origin': 'o-101'}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [self.p1])
 
     def test__get_pings__origin_non_existent(self):
         """test: przykładowa baza danych, wywołanie z origin nieistniejącym, zwrócony wynik pusty"""
         self.prep1()
         request.args = {'origin': 'o-bla'}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [])
 
     def test__get_pings__target_existing(self):
         """test: przykładowa baza danych, wywołanie z target istniejącym, zwrócony wynik wg tagret"""
         self.prep1()
         request.args = {'target': 't-102'}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [self.p2])
 
     def test__get_pings__tagret_non_existent(self):
         """test: przykładowa baza danych, wywołanie z taget nieistniejącym, zwrócony wynik pusty"""
         self.prep1()
         request.args = {'target': 't-bla'}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(r, [])
 
     def limit_helper(self, n):
         self.prep1()
         request.args = {'limit': str(n)}
-        r = get_pings2()
+        r = get_pings()
         self.assertEqual(len(r), n)
 
     def test__get_pings__limit_0(self):
