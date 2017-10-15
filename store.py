@@ -14,7 +14,7 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_ECHO'] = False
 
 from testprep import aw_testing
 if aw_testing:
@@ -235,14 +235,13 @@ def add_ping(p):
 
 @app.route('/pings', methods=['POST'])
 def ping_post_view():
-    j = request.get_json() # będzie źle jeśli nie w formacie JSON
-    # co z id? a jak nie będzie?
-    p = PingResult( \
-        id=j['id'], time=j['time'], origin=j['origin'], \
+    j = request.get_json()
+    # dozwolony brak id, brak pozostałych spowoduje błąd
+    p = PingResult( id=j.get('id'), time=j['time'], origin=j['origin'], \
         target=j['target'], success=j['success'], rtt=j['rtt'])
     add_ping(p)
     db.session.commit()
-    return 'posted! '+str(j) + str(p)
+    return 'posted!'
 
 @app.route('/pings', methods=['DELETE'])
 def pings_delete():
