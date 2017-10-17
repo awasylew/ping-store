@@ -12,18 +12,13 @@ import datetime
 import os
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pings.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('STORE_DB')
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://pingstore:pingstore@localhost/pingstore1'
-#uwaga hasło w kodzie, pobrać ze środowska
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 
 from testprep import aw_testing
 if aw_testing:
     Base = declarative_base()
-    def pseudo_jsonify(x): return x    # usunąć jeśli już potrzebne
-    jsonify = pseudo_jsonify
     class Dummy: pass
     request = Dummy()
 else:
@@ -52,9 +47,6 @@ class PingResult(Base):
 
 if aw_testing:
     engine = create_engine(os.getenv('STORE_TEST_DB'), echo=False)
-    # engine = create_engine('sqlite:///:memory:', echo=False)
-    # engine = create_engine('mysql://pingstore:pingstore@localhost/pingstoretest', echo=False)
-    # uwaga hasło w kodzie; pobierać ze środowiska
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     test_session = Session()
