@@ -46,13 +46,6 @@ class make_database_testing(unittest.TestCase):
         r = get_pings()
         self.assertEqual(r, [self.p1])
 
-    def test__get_pings__id_existing2(self):
-        """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
-        self.prep1()
-        request.args = {'id': 101}
-        r = get_pings()
-        self.assertEqual(r, [self.p1])
-
     def test__get_pings__id_nonexistent(self):
         """test: przykładowa baza danych, wywołanie z id nieistniejących, zwrócony wynik pusty"""
         self.prep1()
