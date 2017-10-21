@@ -11,36 +11,26 @@ base = 'http://localhost:5000'
 
 class test1(unittest.TestCase):
     def prep1(self):
-        self.time=datetime.datetime.now().strftime('%Y%m%d%H')
-        self.p1 = { 'id':101, 'time':self.time+'0101', 'origin':'o-101', 'target':'t-101', 'success':True, 'rtt':101.01}
-        self.p2 = { 'id':102, 'time':self.time+'0202', 'origin':'o-102', 'target':'t-102', 'success':True, 'rtt':102.02}
-        self.prep2()
-        return
-        d = requests.delete(base+'/pings')
-        self.time=datetime.datetime.now().strftime('%Y%m%d%H')
-        self.p1 = { 'id':101, 'time':self.time+'0101', 'origin':'o-101', 'target':'t-101', 'success':True, 'rtt':101.01}
-        p = requests.post(base+'/pings', data=json.dumps(self.p1), headers={'Content-type':'application/json'})
-        self.p2 = { 'id':102, 'time':self.time+'0202', 'origin':'o-102', 'target':'t-102', 'success':True, 'rtt':102.02}
-        p = requests.post(base+'/pings', data=json.dumps(self.p2), headers={'Content-type':'application/json'})
-
-    def prep2(self):
         test_session.query(PingResult).delete()
-        #self.time=datetime.datetime.now().strftime('%Y%m%d%H')
+        test_session.commit()
+        self.time=datetime.datetime.now().strftime('%Y%m%d%H')
         p1 = PingResult(id=101, time=self.time+'0101', origin='o-101', \
-            target='t-101', success=True, rtt=101)
-        #self.p1d = self.p1.to_dict()
+            target='t-101', success=True, rtt=101.01)
         p2 = PingResult(id=102, time=self.time+'0202', origin='o-102', \
-            target='t-102', success=True, rtt=102)
-        #self.p2d = self.p2.to_dict()
+            target='t-102', success=True, rtt=102.02)
         test_session.add(p1)
         test_session.add(p2)
-        # print(test_session.query(PingResult).all())
-
+        test_session.commit()
+        self.p1 = p1.to_dict()
+        self.p2 = p2.to_dict()
 
     def test__get_pings_id__existing(self):
         """test: przykładowa baza danych, wywołanie z id istniejącym, zwrócony wynik wg id"""
         self.prep1()
+
         r = requests.get(base+'/pings/101')
+        # czy używać tu url_for?
+
         p = r.json()
         self.assertEqual(p, self.p1)
         r = requests.get(base+'/pings/102')
@@ -93,10 +83,57 @@ class test1(unittest.TestCase):
         self.assertEqual(r.json(), [self.p2])
         print('OK')
 
+    def test__get_pings__origin_existing(self):
+        """test: przykładowa baza danych, wywołanie z origin istniejącym, zwrócony wynik wg origin"""
+        self.prep1()
+        r = requests.get(base+'/pings?origin=o-101')
+        self.assertEqual(r.json(), [self.p1])
+        print('OK')
+
+    def test__get_pings__origin_non_existent(self):
+        """test: przykładowa baza danych, wywołanie z origin nieistniejącym, zwrócony wynik pusty"""
+        self.prep1()
+        r = requests.get(base+'/pings?origin=o-bla')
+        self.assertEqual(r.json(), [])
+        print('OK')
+
+    def test__get_pings__target_existing(self):
+        """test: przykładowa baza danych, wywołanie z target istniejącym, zwrócony wynik wg tagret"""
+        self.prep1()
+        r = requests.get(base+'/pings?target=t-102')
+        self.assertEqual(r.json(), [self.p2])
+        print('OK')
+
+    def test__get_pings__tagret_non_existent(self):
+        """test: przykładowa baza danych, wywołanie z taget nieistniejącym, zwrócony wynik pusty"""
+        self.prep1()
+        r = requests.get(base+'/pings?target=t-bla')
+        self.assertEqual(r.json(), [])
+        print('OK')
+
+    def limit_helper(self, n):
+        self.prep1()
+        r = requests.get(base+'/pings?limit='+str(n))
+        self.assertEqual(len(r.json()), n)
+        print('OK')
+
+    def test__get_pings__limit_0(self):
+        """test: limit = 0"""
+        self.limit_helper(0)
+
+    def test__get_pings__limit_1(self):
+        """test: limit = 1"""
+        self.limit_helper(1)
+
+    def test__get_pings__limit_2(self):
+        """test: limit = 2"""
+        self.limit_helper(2)
+
 
 
 print('hello!')
 t = test1()
+
 t.test__get_pings_id__existing()
 t.test__get_pings_id__nonexistent()
 t.test__get_pings__id_existing()
@@ -104,4 +141,12 @@ t.test__get_pings__no_id()
 t.test__git_pings__start()
 t.test__git_pings__end()
 t.test__git_pings__time_prefix()
+t.test__get_pings__origin_existing()
+t.test__get_pings__origin_non_existent()
+t.test__get_pings__target_existing()
+t.test__get_pings__tagret_non_existent()
+t.test__get_pings__limit_0()
+t.test__get_pings__limit_1()
+t.test__get_pings__limit_2()
+
 # wywołanie wszystkich testów z unittest zamiast ręcznego? (ale długo będzie trwać)
