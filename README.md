@@ -1,7 +1,20 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
-* parametry ze środowiska, może da się wtedy uładnić kod warunkujący testy?
+* TLS testy wymuszonego połączenia szyfrowanego dla użytkownika 1/4h
+* j.w. z pythona 1/4h
+* TLS poczytać o X509 1h
+* TLS stworzyć certyfikaty 1/2h
+* TLS połączenia z certyfikatami 1/2h
+* RDS poczytać o bezpieczeństwie 1h
+* RDS najprostsze połączenie 1/2h
+* RDS działające połączenie z lokalnego ping-store 1/2h
+* RDS z certyfikatami 1/2h
+* RDS bez certyfikatów z heroku 1/2h
+* RDS z certyfikatami z heroku 1/2h
+* parametry ze środowiska - dokończyć
+* dwustopnione parametry ze środowiska
+* czy po parametrach ze środowiska  da się wtedy uładnić kod warunkujący testy?
 * sortowanie hostów wg hopów
 * zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
 * testy jednostkowe - dalej
