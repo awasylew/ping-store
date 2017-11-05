@@ -13,8 +13,8 @@ tags:
   description: Słowniki do zapytań (stworzone automatycznie z wyników ping)
 schemes:
 - http
-host: localhost:5000
-# host: ping-store.herokuapp.com
+# host: localhost:5000  -- o tyle nie ma sensu, że nie wydaje się działać na localhost
+host: ping-store.herokuapp.com
 paths:
   /pings:
     get:
@@ -40,7 +40,7 @@ paths:
       tags:
       - pings
       summary: Wstawianie wyników ping. 
-      description: 'Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz. **TODO: kontrola parametrów, błędy**'
+      description: 'Wyniki można wstawiać z opóźnieniem i nie w kolejności. Jeśli opóźnienie jest duże, próbka może być odrzucona (komunikat błędu czy ciche odrzucenie?). Nie ma wstawiania wielu próbek na raz. Zamiast wartości time dopuszczalne jest _now_, dla którego bieżący czas podstawi serwer (wg swojego zegara i strefy czasowej!)**TODO: kontrola parametrów, błędy**'
       consumes:
       - "application/json"
       produces:
@@ -221,7 +221,7 @@ definitions:
         example: 367
       time:
         type: string
-        description: moment wykonania testu w formacie tekstowym YYYYMMDDHHMMSS - porządek leksykograficzny pozwala porównywać tekstowo z prefiksami oznaczającymi grubsze jednostki czasu
+        description: moment wykonania testu w formacie tekstowym YYYYMMDDHHMMSS - porządek leksykograficzny pozwala porównywać tekstowo z prefiksami oznaczającymi grubsze jednostki czasu; zamiast wartości time dopuszczalne jest _now_, dla którego bieżący czas podstawi serwer (wg swojego zegara i strefy czasowej!)
         example: '20170907094734'
       origin:
         type: string 
