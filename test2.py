@@ -144,23 +144,15 @@ class test1(unittest.TestCase):
         h = {'Content-type': 'application/json'}
         r = requests.post(base+'/pings', data=payload, headers=h)
         pr = test_session.query(PingResult).one()
-        print(pr)
-        print(pr.to_dict())
-        print(time)
         time2 = time + datetime.timedelta(minutes=1)
-        print(time2)
         times = time.strftime('%Y%m%d%H%M%S')
         time2s = time2.strftime('%Y%m%d%H%M%S')
-        print(times)
-        print(time2s)
-        print(pr.time)
         self.assertLessEqual(times, pr.time)
         self.assertLessEqual(pr.time, time2s)
 
 print('Starting testing session...')
 t = test1()
 
-""" chwilowo wyłączone
 t.test__get_pings_id__existing()
 t.test__get_pings_id__nonexistent()
 t.test__get_pings__id_existing()
@@ -175,7 +167,6 @@ t.test__get_pings__tagret_non_existent()
 t.test__get_pings__limit_0()
 t.test__get_pings__limit_1()
 t.test__get_pings__limit_2()
-"""
 t.test__post_pings__time_now()
 
 # wywołanie wszystkich testów z unittest zamiast ręcznego? (ale długo będzie trwać)
