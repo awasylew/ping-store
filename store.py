@@ -185,7 +185,9 @@ def pings_post_generic(args):
     # kontrola czy jest
     # kontrola czy poprawny
     # kontrola czy nie odrzucić z powodu starości
-
+    if time=="now":
+        time = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    
     origin = args.get('origin')
     # kontrole ...
 
