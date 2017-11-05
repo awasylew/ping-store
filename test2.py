@@ -10,7 +10,14 @@ from store import *
 base = 'http://localhost:5000'
 
 class test1(unittest.TestCase):
+
+    def prep0(self):
+        """przygotowanie: pusta baza danych"""
+        test_session.query(PingResult).delete()
+        test_session.commit()
+
     def prep1(self):
+        """przygotowanie: baza danych z dwoma wpisami testowymi"""
         test_session.query(PingResult).delete()
         test_session.commit()
         self.time=datetime.datetime.now().strftime('%Y%m%d%H')
@@ -129,11 +136,31 @@ class test1(unittest.TestCase):
         """test: limit = 2"""
         self.limit_helper(2)
 
+    def test__post_pings__time_now(self):
+        """test: time=now"""
+        self.prep0()
+        time = datetime.datetime.now()
+        payload = json.dumps({'origin':'o-p1', 'target':'t-p1', 'success':True, 'rtt':34.56, 'time':'now'})
+        h = {'Content-type': 'application/json'}
+        r = requests.post(base+'/pings', data=payload, headers=h)
+        pr = test_session.query(PingResult).one()
+        print(pr)
+        print(pr.to_dict())
+        print(time)
+        time2 = time + datetime.timedelta(minutes=1)
+        print(time2)
+        times = time.strftime('%Y%m%d%H%M%S')
+        time2s = time2.strftime('%Y%m%d%H%M%S')
+        print(times)
+        print(time2s)
+        print(pr.time)
+        self.assertLessEqual(times, pr.time)
+        self.assertLessEqual(pr.time, time2s)
 
-
-print('hello!')
+print('Starting testing session...')
 t = test1()
 
+""" chwilowo wyłączone
 t.test__get_pings_id__existing()
 t.test__get_pings_id__nonexistent()
 t.test__get_pings__id_existing()
@@ -148,5 +175,7 @@ t.test__get_pings__tagret_non_existent()
 t.test__get_pings__limit_0()
 t.test__get_pings__limit_1()
 t.test__get_pings__limit_2()
+"""
+t.test__post_pings__time_now()
 
 # wywołanie wszystkich testów z unittest zamiast ręcznego? (ale długo będzie trwać)

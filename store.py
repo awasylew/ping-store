@@ -241,7 +241,11 @@ def add_ping(p):
 def ping_post_view():
     j = request.get_json()
     # dozwolony brak id, brak pozostałych spowoduje błąd
-    p = PingResult( id=j.get('id'), time=j['time'], origin=j['origin'], \
+    if j['time'] == 'now':
+        time = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    else:
+        time = j['time']
+    p = PingResult( id=j.get('id'), time=time, origin=j['origin'], \
         target=j['target'], success=j['success'], rtt=j['rtt'])
     add_ping(p)
     db.session.commit()
