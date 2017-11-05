@@ -8,11 +8,12 @@ from store import *
 class make_database_testing(unittest.TestCase):
 
     def setUp(self):
-        test_session.expire_all()
+        test_session.expire_all() # to może niepotrzebne - pozostałośc z prób DELETE
+        # problem: baza powinna być pusta na przed każdym testem; można zrobić co najmniej sprawdzenie, mocniej, ale ryzykowniej: czyszczenie
 
     def tearDown(self):
-        test_session.rollback()
-        test_session.expire_all()
+        test_session.rollback() # to może niepotrzebne - pozostałośc z prób DELETE
+        test_session.expire_all() # to może niepotrzebne - pozostałośc z prób DELETE
 
     def prep1(self):
         self.time=datetime.datetime.now().strftime('%Y%m%d%H')

@@ -19,7 +19,7 @@
 * poczytać o AWS? RDS? OIDC federation
 * całokształt zagadnień bezpieczeństwa (checklist?)
 * requestb.in
-* parametry ze środowiska - dokończyć
+* parametry ze środowiska - dokończyć, w tym debug
 * dwustopnione parametry ze środowiska
 * czy po parametrach ze środowiska  da się wtedy uładnić kod warunkujący testy?
 * sortowanie hostów wg hopów

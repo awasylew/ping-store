@@ -221,9 +221,9 @@ def pings_post():
     """test: sprawdzenie, że parametry dobrze przechodzą przez treść POSTa???"""
     return pings_post_generic(request.json)
 
-@app.route('/pings-post')    # do testów, !!! ping-probe umie nma razie tylko GET
+@app.route('/pings-post')    # do testów, !!! ping-probe umie na razie tylko GET, już nieprawda
 def pings_post_pseudo():
-    # zmienić nazwę na pseude_post_pings
+    # zmienić nazwę na pseudo_post_pings
     args = {k:request.args.get(k) for k in request.args}
     succ_arg = args.get('success')
     success = succ_arg is not None and succ_arg.upper() not in ['FALSE', '0']
@@ -239,7 +239,7 @@ def add_ping(p):
 
 @app.route('/pings', methods=['POST'])
 def ping_post_view():
-    j = request.get_json()
+    j = request.get_json() # brak obsługi błędów formatu
     # dozwolony brak id, brak pozostałych spowoduje błąd
     if j['time'] == 'now':
         time = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
