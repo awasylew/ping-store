@@ -25,7 +25,7 @@
 * sortowanie hostów wg hopów
 * zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
 * testy jednostkowe - dalej
-* testy end-end
+* testy end-end: dokończyć, przerobić na wyknalne bez dostępu do bazy danych
 * testy z innymi bazami danych (MySQL, PostgreSQL)
 * testy z indeksem na time, inne indeksy?
 * wyniki jako JSON albo XML na podstawie Accept? przynajmniej w niektórych miejscach?
