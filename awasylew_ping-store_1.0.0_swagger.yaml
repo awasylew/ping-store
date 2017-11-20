@@ -3,7 +3,8 @@ info:
   description: API do magazynu ping-store.
   version: 1.0.0
   title: ping-store
-basePath: /
+basePath: /dev
+#basePath: /
 tags:
 - name: pings
   description: Surowe zapisy pojedynczych pingów
@@ -12,9 +13,10 @@ tags:
 - name: słowniki
   description: Słowniki do zapytań (stworzone automatycznie z wyników ping)
 schemes:
-- http
+- https
 # host: localhost:5000  -- o tyle nie ma sensu, że nie wydaje się działać na localhost
-host: ping-store.herokuapp.com
+# host: ping-store.herokuapp.com
+host: dmd21xtvq2.execute-api.eu-west-1.amazonaws.com
 paths:
   /pings:
     get:
