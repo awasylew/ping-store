@@ -18,3 +18,7 @@ pip install mysqlclient
 --> rozbudowa URL pomaga na commit: create_engine('mysql://root2:XXX@localhost/sqlalch1?charset=utf8')
    --> zostaje ostrzeżenie i nie mogę się go pozbyć
    --> okazuje się, że to problem ze zmienną MySQL system_time_zone, jest na to głoszony błąd MySQL w 2014r ale nie ma jeszcze rozwiązania :(
+
+pip install pymysql
+--> przerzucam się na to z powodu Lambda, wygląda że działa
+??? na pewno to zrobiłem? sprawdzić w domu, bo nie ma github!
