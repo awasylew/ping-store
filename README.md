@@ -2,19 +2,14 @@
 
 ## TO-DO
 * Node.js
-* AWS lambda
+* AWS lambda dokończyć, mądra konfiguracja powiązań
 * sprawdzić czy wszystkie pliki deplymentowe heroku są potrzebne czy tylko zaśmiecają z innych miejsc
 * develo testowanie zautomatyzowane na różnych wersjach Pythona np. 3.4.x, 3.5.x, 3.6.x, OS, bibliotek
-* TLS testy wymuszonego połączenia szyfrowanego dla użytkownika 1/4h
-* j.w. z pythona 1/4h
 * TLS poczytać o X509 1h
 * TLS stworzyć certyfikaty 1/2h
 * TLS połączenia z certyfikatami 1/2h
 * RDS poczytać o bezpieczeństwie 1h
-* RDS najprostsze połączenie 1/2h
-* RDS działające połączenie z lokalnego ping-store 1/2h
-* RDS z certyfikatami 1/2h
-* RDS bez certyfikatów z heroku 1/2h
+* RDS z certyfikatami z lokalnego 1/2h
 * RDS z certyfikatami z heroku 1/2h
 * poczytać o AWS? RDS? OIDC federation
 * całokształt zagadnień bezpieczeństwa (checklist?)
