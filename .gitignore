@@ -1,5 +1,8 @@
-ve/
-ve2/
+/ve/
+/ve-zappa/
+/ve2/
+/vepm/
+/vepm-zappa/
 __pycache__/
 
 pings.db
