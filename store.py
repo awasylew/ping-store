@@ -187,7 +187,7 @@ def pings_post_generic(args):
     # kontrola czy nie odrzucić z powodu starości
     if time=="now":
         time = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    
+
     origin = args.get('origin')
     # kontrole ...
 
@@ -241,7 +241,7 @@ def add_ping(p):
 
 @app.route('/pings', methods=['POST'])
 def ping_post_view():
-    j = request.get_json() # brak obsługi błędów formatu
+    j = request.get_json(force=True) # brak obsługi błędów formatu #force z powodu zappa@lambda
     # dozwolony brak id, brak pozostałych spowoduje błąd
     if j['time'] == 'now':
         time = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
