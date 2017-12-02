@@ -1,41 +1,43 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
-* Node.js
+* zbudować automaty do CI/CD
 * AWS lambda dokończyć, mądra konfiguracja powiązań
+* przepiąć ESP na Lambda
+* RDS poczytać o bezpieczeństwie 1h
+* zrobić dobre bezpieczeństwo dla RDS i Lambdy
+* parametry ze środowiska - dokończyć, w tym debug
+* dwustopnione parametry ze środowiska?
+* uwierzytelnianie pomiędzy komponentami
+* testy jednostkowe - dalej trochę, opisać czego brakuje
+* testy end-end: dokończyć, przerobić na wyknalne bez dostępu do bazy danych, - dalej trochę, opisać czego brakuje
+* testy z PostgreSQL???
+* testy z indeksem na time, inne indeksy
+* kasowanie nadmiaru
+* środowisko: tworzenie venv skryptem???
+* środowisko: tworzenie produkcji, testów, konfiguracje maszyn ze sobą??? (może tworzenie pełnego środowiska razem z deploymentem)
+* dodać kody błędów do swaggera i do kodu - a przynajmniej opisać, jakich brakuje
+* sortowanie do sensownego działania limit i offset, chyba już tylko opisać?
+* zlikwidować wykorzystanie niepoprawnych metod HTTP
+* odczytywanie agregatów z pingów surowych - posprzątać, opisać co niegotowe
+* POST pings dodać sprawdzenie parametrów (nie mogą być puste, bo potem trafiają na ścieżki; muszą być bezpiecznymi ścieżkami, automatyczne ubezpiecznianie?) - jeśli robić to chyba jako trening refactoringu ze wsparciem testami automatycznymi
+* lokalne MQTT odbiera, MQTT nadaje, MQTT rozmnaża
+* trochę lepiej udokumentować czego brakuje w pierszej fazie, żeby dało się kiedyś zrobić drugą
+* wyczyścić całość README
+
+## Tego już nie będę robić w bieżącym podejściu
+* doczytać i potestować  (dziwne: udały się konkurencyjne zmiany chyba w SQLite, a może w MySQL) zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
+* pamięć sond na wypadek przerwy w połączeniu
+* automatyczna agregacja
+* środowisko: ścisłe wersje w pip, kontrolowany proces upgrade
+* wyniki jako JSON albo XML na podstawie Accept? przynajmniej w niektórych miejscach?
+* zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
+* sortowanie hostów wg hopów
+* czy po parametrach ze środowiska da się uładnić kod warunkujący testy?
+* TLS połączenia z certyfikatami 1/2h
 * sprawdzić czy wszystkie pliki deplymentowe heroku są potrzebne czy tylko zaśmiecają z innych miejsc
 * develo testowanie zautomatyzowane na różnych wersjach Pythona np. 3.4.x, 3.5.x, 3.6.x, OS, bibliotek
-* TLS poczytać o X509 1h
-* TLS stworzyć certyfikaty 1/2h
-* TLS połączenia z certyfikatami 1/2h
-* RDS poczytać o bezpieczeństwie 1h
-* RDS z certyfikatami z lokalnego 1/2h
-* RDS z certyfikatami z heroku 1/2h
-* poczytać o AWS? RDS? OIDC federation
-* całokształt zagadnień bezpieczeństwa (checklist?)
-* requestb.in
-* parametry ze środowiska - dokończyć, w tym debug
-* dwustopnione parametry ze środowiska
-* czy po parametrach ze środowiska  da się wtedy uładnić kod warunkujący testy?
-* sortowanie hostów wg hopów
-* zliczanie brakujących raportów i prezentacja na dedykowanej stronie?
-* testy jednostkowe - dalej
-* testy end-end: dokończyć, przerobić na wyknalne bez dostępu do bazy danych
-* testy z innymi bazami danych (MySQL, PostgreSQL)
-* testy z indeksem na time, inne indeksy?
-* wyniki jako JSON albo XML na podstawie Accept? przynajmniej w niektórych miejscach?
-* środowisko: tworzenie venv skryptem
-* środowisko: tworzenie produkcji, testów, konfiguracje maszyn ze sobą
-* środowisko: ścisłe wersje w pip, kontrolowany proces upgrade
-* komponenty?: testowanie przynajmniej okresowo (do automatów: zawsze?) również z MySQL (szczególnie: func.substr)
-* dodać kody błędów do swaggera i do kodu
-* sortowanie do sensownego działania limit i offset, opisać?
-* użycie poprawnych metod HTTP -> testowanie przez swaggerhub
-* odczytywanie agregatów z pingów surowych
-* automatyczna agregacja
-* pamięć sond na wypadek przerwy w połączeniu
-* doczytać i potestować  (dziwne: udały się konkurencyjne zmiany) zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
-* POST pings dodać sprawdzenie parametrów (nie mogą być puste, bo potem trafiają na ścieżki; muszą być bezpiecznymi ścieżkami, automatyczne ubezpiecznianie?)
+* Node.js
 
 ## Opis komponentu
 
