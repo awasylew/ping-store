@@ -8,3 +8,5 @@ __pycache__/
 pings.db
 setproxy.bat
 set1.bat
+setawscred.bat
+zappa_settings.json
