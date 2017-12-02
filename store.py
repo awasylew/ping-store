@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean, Float
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
+from sqlalchemy import case, literal_column
 
 import random
 import datetime
@@ -328,7 +329,9 @@ def get_periods( period_name, prefix_len ):
         func.substr(PingResult.time,1,prefix_len).label('prefix'),
         func.min(PingResult.rtt).label('min_rtt'),
         func.avg(PingResult.rtt).label('avg_rtt'),
-        func.max(PingResult.rtt).label('max_rtt'))
+        func.max(PingResult.rtt).label('max_rtt'),
+        func.count(PingResult.success).label('count_all'),
+        func.count(case([((PingResult.success==True), PingResult.success)], else_=literal_column("NULL"))).label('count_success'))
     """q = query_add_args_time(q)
     q = query_add_args_hosts(q)"""
     q = query_add(q, time=True, hosts=True)
@@ -337,20 +340,17 @@ def get_periods( period_name, prefix_len ):
     # czy powinno być offset/limit? czy to ma zastosowanie do GROUP BY?
     l = []
     for i in q:
-        origin = i.origin #i[0]   # może da się ładniej .label?   albo i.origin
+        origin = i.origin #i[0]
         target = i.target #i[1]
         prefix = i.prefix #i[2]
         min_rtt = i.min_rtt #i[3]
         avg_rtt = i.avg_rtt #i[4]
         max_rtt = i.max_rtt #i[5]
-        count1 = query_add_args_hosts(query_add_args_time( \
-            db.session.query(PingResult.origin))).\
-            filter(PingResult.time.like(prefix+'%'))
-        count_all = 123 #count1.count()
-        count_success = 23 # count1.filter(PingResult.success == True).count()
-        # może po zmianie z distinct na group by w głównym zapytaniu da się zrezygnować z zapytań zagnieżdżonych?
+        count_all = i.count_all #123 #count1.count()
+        count_success = i.count_success #23 #
         l.append({'origin':origin, 'target':target, period_name:prefix, \
-            'count':count_all, 'count_success':count_success, \
+            'count':count_all, \
+            'count_success':count_success, \
             'avg_rtt': avg_rtt, 'min_rtt': min_rtt, 'max_rtt': max_rtt, \
             'links':[{'rel':'pings', 'href':url_for('get_pings_view', origin=origin, \
                 target=target, time_prefix=prefix, _external=True)}]})
