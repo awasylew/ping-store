@@ -323,9 +323,12 @@ def get_hours():
 def get_periods( period_name, prefix_len ):
     """wyciąga zagregowane wyniki dla wybranego okresu (leksykograficznie)"""
     """test:..."""
-    q = db.session.query(PingResult.origin, PingResult.target, \
-        func.substr(PingResult.time,1,prefix_len),
-        func.min(PingResult.rtt), func.avg(PingResult.rtt), func.max(PingResult.rtt))
+    q = db.session.query(PingResult.origin.label('origin'),
+        PingResult.target.label('target'), \
+        func.substr(PingResult.time,1,prefix_len).label('prefix'),
+        func.min(PingResult.rtt).label('min_rtt'),
+        func.avg(PingResult.rtt).label('avg_rtt'),
+        func.max(PingResult.rtt).label('max_rtt'))
     """q = query_add_args_time(q)
     q = query_add_args_hosts(q)"""
     q = query_add(q, time=True, hosts=True)
@@ -334,12 +337,12 @@ def get_periods( period_name, prefix_len ):
     # czy powinno być offset/limit? czy to ma zastosowanie do GROUP BY?
     l = []
     for i in q:
-        origin = i[0]   # może da się ładniej .label?   albo i.origin
-        target = i[1]
-        prefix = i[2]
-        min_rtt = i[3]
-        avg_rtt = i[4]
-        max_rtt = i[5]
+        origin = i.origin #i[0]   # może da się ładniej .label?   albo i.origin
+        target = i.target #i[1]
+        prefix = i.prefix #i[2]
+        min_rtt = i.min_rtt #i[3]
+        avg_rtt = i.avg_rtt #i[4]
+        max_rtt = i.max_rtt #i[5]
         count1 = query_add_args_hosts(query_add_args_time( \
             db.session.query(PingResult.origin))).\
             filter(PingResult.time.like(prefix+'%'))
