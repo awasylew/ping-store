@@ -343,8 +343,8 @@ def get_periods( period_name, prefix_len ):
         count1 = query_add_args_hosts(query_add_args_time( \
             db.session.query(PingResult.origin))).\
             filter(PingResult.time.like(prefix+'%'))
-        count_all = count1.count()
-        count_success = count1.filter(PingResult.success == True).count()
+        count_all = 123 #count1.count()
+        count_success = 23 # count1.filter(PingResult.success == True).count()
         # może po zmianie z distinct na group by w głównym zapytaniu da się zrezygnować z zapytań zagnieżdżonych?
         l.append({'origin':origin, 'target':target, period_name:prefix, \
             'count':count_all, 'count_success':count_success, \
