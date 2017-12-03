@@ -3,6 +3,7 @@
 /ve2/
 /vepm/
 /vepm-zappa/
+/secret/
 __pycache__/
 
 pings.db
