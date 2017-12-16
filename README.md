@@ -1,6 +1,7 @@
 # Komponent ping-store (aw-ping-store)
 
 ## TO-DO
+* zbudować model infrastruktury UML, ArchiMate
 * zbudować automaty do CI/CD
 * AWS lambda dokończyć, mądra konfiguracja powiązań
 * przepiąć ESP na Lambda
@@ -24,6 +25,17 @@
 * lokalne MQTT odbiera, MQTT nadaje, MQTT rozmnaża
 * trochę lepiej udokumentować czego brakuje w pierszej fazie, żeby dało się kiedyś zrobić drugą
 * wyczyścić całość README
+
+## INFRA
+* RDS (jedna instancja)
+  * baza dev
+  * baza prod
+* Lambda store
+  * dev
+  * prod
+* Lambda show
+  * dev
+  * prod
 
 ## Tego już nie będę robić w bieżącym podejściu
 * doczytać i potestować  (dziwne: udały się konkurencyjne zmiany chyba w SQLite, a może w MySQL) zachowanie bazy sqlite przy jednoczesnych zapisach i odczytach tych samych rekordów, przeanalizować sytuacje równoległości w przypadkach użycia komponentu ping-store  
